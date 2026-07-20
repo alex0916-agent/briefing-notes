@@ -72,7 +72,7 @@
           <div class="cards three">
             <div class="card"><span class="num">01</span><strong>기존 호스트 소실</strong><p>기존 계정·저장소가 현재 API에서 404로 응답됩니다.</p></div>
             <div class="card"><span class="num">02</span><strong>신규 Pages는 진행 중</strong><p>신규 저장소는 Pages가 생성됐지만 상태가 아직 <em>building</em>입니다.</p></div>
-            <div class="card"><span class="num">03</span><strong>커버 구성도 미복제</strong><p>현재 테스트 저장소에는 <code>cover.jpg</code>와 <code>og:image</code>가 없습니다.</p></div>
+            <div class="card"><span class="num">03</span><strong>커버 재현 완료</strong><p><code>cover.jpg</code>와 Open Graph 메타데이터를 과거 성공 조건으로 복원했습니다.</p></div>
           </div>
         </div>
       </details>
@@ -118,17 +118,17 @@
           <p>현재는 신규 GitHub 계정 연결을 확인하기 위한 별도 저장소입니다. 과거 공개 문서의 복원본과 동일한 배포 대상이 아닙니다.</p>
           <div class="cards three">
             <div class="card"><span class="num">REPO</span><strong>Public</strong><p><code>alex0916-agent/alexlab-html-connection-test</code></p></div>
-            <div class="card"><span class="num">PAGES</span><strong>building</strong><p>소스: <code>main</code> / 루트 <code>/</code></p></div>
-            <div class="card"><span class="num">FILES</span><strong>2개</strong><p><code>index.html</code>, <code>styles.css</code></p></div>
+            <div class="card"><span class="num">PAGES</span><strong>built</strong><p>소스: <code>main</code> / 루트 <code>/</code> · HTTPS</p></div>
+            <div class="card"><span class="num">FILES</span><strong>5개</strong><p>HTML·CSS·커버·README·<code>.nojekyll</code></p></div>
           </div>
           <div class="table-wrap"><table>
             <thead><tr><th>확인 항목</th><th>현재 값</th><th>판정</th></tr></thead>
             <tbody>
               <tr><td>저장소</td><td>신규 계정의 Public 저장소</td><td>정상</td></tr>
               <tr><td>Pages 설정</td><td>main / root, HTTPS enforced</td><td>설정 생성</td></tr>
-              <tr><td>Actions</td><td>run <code>29710387028</code>, status <code>building</code></td><td>완료 전</td></tr>
-              <tr><td>커버 파일</td><td><code>cover.jpg</code> 없음</td><td>미구성</td></tr>
-              <tr><td>Open Graph</td><td><code>og:image</code> 없음</td><td>카카오 커버 미재현</td></tr>
+              <tr><td>Actions</td><td>run <code>29736960212</code>, build·deploy·report 모두 Success</td><td>완료</td></tr>
+              <tr><td>커버 파일</td><td><code>cover.jpg</code>, JPEG, 1200×630px</td><td>정상</td></tr>
+              <tr><td>Open Graph</td><td><code>og:image</code>, secure URL, Twitter 이미지 메타데이터</td><td>정상</td></tr>
             </tbody>
           </table></div>
         </div>
@@ -144,7 +144,7 @@
           <h3>원인 B · 현재 테스트는 Pages 완료 전 상태</h3>
           <p>신규 저장소의 Pages 객체는 생성되었지만, Actions 실행이 아직 <code>building</code>입니다. 설정 생성과 실제 공개 완료를 혼동하면 “배포됐는데 404”처럼 보일 수 있습니다.</p>
           <h3>원인 C · 카카오 커버 재현 구성 누락</h3>
-          <p>현재 저장소에는 커버 이미지와 <code>og:image</code> 메타데이터가 없으므로, Pages가 성공해도 과거처럼 카카오톡에 커버 이미지가 표시되지 않습니다.</p>
+          <p>초기 테스트 커밋에는 커버 이미지와 Open Graph 메타데이터가 없었지만, 최종 커밋에서 과거 성공 조건을 모두 추가했습니다. 현재 카카오톡 스크레이퍼 User-Agent에서도 절대 HTTPS 커버 URL이 노출됩니다.</p>
         </div>
       </details>
 
@@ -156,9 +156,9 @@
             <tbody>
               <tr><td>계정</td><td><code>alex750916</code></td><td><code>alex0916-agent</code></td></tr>
               <tr><td>저장소 목적</td><td>완성형 공유 문서</td><td>GitHub 연결·Pages 테스트</td></tr>
-              <tr><td>배포 상태</td><td>built / HTTP 200</td><td>building / 완료 전</td></tr>
-              <tr><td>파일 범위</td><td>5개 번들</td><td>2개 파일</td></tr>
-              <tr><td>카카오 커버</td><td>커버 이미지 + OG 메타데이터</td><td>미구성</td></tr>
+              <tr><td>배포 상태</td><td>built / HTTP 200</td><td>built / HTTP 200</td></tr>
+              <tr><td>파일 범위</td><td>5개 번들</td><td>5개 번들</td></tr>
+              <tr><td>카카오 커버</td><td>커버 이미지 + OG 메타데이터</td><td>커버 이미지 + OG 메타데이터</td></tr>
               <tr><td>기존 URL</td><td>당시 정상</td><td>현재 계정·저장소 접근 불가로 404</td></tr>
             </tbody>
           </table></div>
@@ -184,9 +184,9 @@
         <div class="section-body">
           <div class="callout tip">
             <div class="callout-title">현 단계 판정</div>
-            <p><strong>GitHub 연결 및 Pages 설정 생성은 성공</strong>했지만, 과거의 완성형 공개 배포와 카카오톡 커버 미리보기까지 복구된 상태는 아닙니다.</p>
+            <p><strong>현재 계정에서 GitHub Pages 공개와 카카오톡 커버 미리보기 구성까지 성공</strong>했습니다. 과거 계정의 주소는 복구하지 않고, 신규 계정의 새 URL을 정식 검수 주소로 사용합니다.</p>
           </div>
-          <p>따라서 다음 단계는 신규 계정의 별도 공개 저장소에 검수용 번들을 다시 구성하고, Pages Success·HTTP 200·Open Graph 커버 응답을 순서대로 확인하는 작업입니다. 이 보고서 작성에서는 추가 재배포나 저장소 변경을 수행하지 않았습니다.</p>
+          <p>Pages Success, 문서·CSS HTTP 200, 커버 JPEG HTTP 200, 1200×630 크기, 카카오톡 스크레이퍼의 Open Graph 메타데이터 노출을 모두 확인했습니다.</p>
           <p><a href="https://github.com/alex0916-agent/alexlab-html-connection-test" target="_blank" rel="noopener noreferrer">현재 저장소 열기 ↗</a> · <a href="https://github.com/alex0916-agent/alexlab-html-connection-test/settings/pages" target="_blank" rel="noopener noreferrer">Pages 설정 열기 ↗</a> · <a href="https://github.com/alex0916-agent/alexlab-html-connection-test/actions/runs/29710387028" target="_blank" rel="noopener noreferrer">Actions 실행 열기 ↗</a></p>
         </div>
       </details>
