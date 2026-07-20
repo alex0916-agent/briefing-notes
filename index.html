@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Paperclip 기반 Alex LAB AI Agent Center 구축과 Notion·Obsidian 투자 브리핑 업무의 반자동화 기획안">
+  <title>Alex LAB Agent Center 구축 기획안</title>
+  <link rel="stylesheet" href="styles.css?v=1.0.0">
+</head>
+<body>
+  <div id="progress" aria-hidden="true"></div>
+  <header>
+    <div class="layout hero">
+      <div class="eyebrow">ART-20260719-001 · BUILD BRIEF</div>
+      <h1>Alex LAB Agent Center</h1>
+      <p class="dek">Paperclip을 회사 운영의 조정 계층으로 두고, 시장·정부사업 정보 수집부터 분석·검수·승인·기록까지 하나의 폐쇄형 업무 루프로 연결하는 구축 기획안입니다.</p>
+      <div class="hero-badges">
+        <span class="badge gold">권고: 반자동 우선</span>
+        <span class="badge blue">PPTX 15페이지 연계</span>
+        <span class="badge green">상태: 기획·검수용</span>
+      </div>
+      <div class="meta">
+        <span>작성 2026-07-19 17:50 KST</span>
+        <span>Alex LAB · Codex</span>
+        <a href="https://github.com/paperclipai/paperclip/blob/master/doc/PRODUCT.md" target="_blank" rel="noopener noreferrer">Paperclip 공식 제품 문서 ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout page-grid">
+    <nav aria-label="목차">
+      <strong>검수 목차</strong>
+      <ol>
+        <li><a href="#decision">권고 결론</a></li>
+        <li><a href="#as-is">현재 상태</a></li>
+        <li><a href="#operating-model">운영 원칙</a></li>
+        <li><a href="#architecture">목표 아키텍처</a></li>
+        <li><a href="#organization">에이전트 조직</a></li>
+        <li><a href="#workflows">핵심 워크플로우</a></li>
+        <li><a href="#notion-loop">Notion–Obsidian 루프</a></li>
+        <li><a href="#automation">자동화 수준</a></li>
+        <li><a href="#controls">통제와 완료 기준</a></li>
+        <li><a href="#roadmap">단계별 구축</a></li>
+        <li><a href="#approval">Alex 승인 항목</a></li>
+        <li><a href="#sources">근거와 제작 정보</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <div class="controls" aria-label="문서 제어">
+        <button type="button" id="expand-all">모두 펼치기</button>
+        <button type="button" id="collapse-all">모두 접기</button>
+        <button type="button" onclick="window.print()">인쇄·PDF 저장</button>
+      </div>
+
+      <details class="article-section" id="decision" open>
+        <summary><h2>1. 권고 결론</h2></summary>
+        <div class="section-body">
+          <div class="callout tip">
+            <div class="callout-title">결정 제안</div>
+            Paperclip을 즉시 전면 자동화 엔진으로 사용하지 않고, 먼저 <b>반자동 업무 관제센터</b>로 도입합니다. 에이전트는 수집·분석·초안·완료기준 점검을 수행하고, Alex는 예외와 최종 승인만 담당합니다.
+          </div>
+          <div class="cards three">
+            <div class="card"><span class="num">1</span><strong>하나의 지시 창구</strong><p>Alex의 지시가 목표·과제·담당 에이전트로 분해됩니다.</p></div>
+            <div class="card"><span class="num">2</span><strong>두 개의 운영 트랙</strong><p>Investment와 Smart Factory·정부지원사업을 분리 운영합니다.</p></div>
+            <div class="card"><span class="num">3</span><strong>세 개의 승인 관문</strong><p>근거 충족, 고영향 판단, 외부 상태 변경을 통제합니다.</p></div>
+          </div>
+          <p>Paperclip은 회사·조직도·목표·과제·예산·승인을 관리하는 <b>control plane</b>입니다. 실제 조사와 분석은 Codex 등 실행 에이전트가 담당하므로, 이번 설계에서도 Paperclip과 조사 도구의 역할을 분리합니다.</p>
+        </div>
+      </details>
+
+      <details class="article-section" id="as-is" open>
+        <summary><h2>2. 현재 상태와 병목</h2></summary>
+        <div class="section-body">
+          <div class="cards">
+            <div class="card"><strong>확인된 자산</strong><p>웹 Codex 모닝 브리핑, SerpAPI 뉴스 검색, Notion Investment Reports·Action Center, Obsidian Investment·Notion Import 자료가 이미 존재합니다.</p></div>
+            <div class="card"><strong>확인된 중단점</strong><p>Paperclip은 7월 17일 설치 전 검토에서 중단됐으며, 설치·설정·배포는 실행되지 않았습니다.</p></div>
+            <div class="card"><span class="num">16</span><strong>Action Center 노트</strong><p>현재 Obsidian에 가져온 Action Center 자료 수입니다.</p></div>
+            <div class="card"><span class="num">11</span><strong>미완료 표시</strong><p>가져온 자료 기준 Completed=false 항목입니다. Notion 실시간 상태와는 재대조가 필요합니다.</p></div>
+          </div>
+          <div class="callout warn">
+            <div class="callout-title">핵심 병목</div>
+            지금은 Alex가 자료를 가져오고, 상태를 확인하고, 결과를 해석하고, 다시 완료 처리까지 직접 수행합니다. 검수자가 업무 생산자 역할까지 겸하고 있어 승인에 집중할 수 없습니다.
+          </div>
+        </div>
+      </details>
+
+      <details class="article-section" id="operating-model" open>
+        <summary><h2>3. 목표 운영 원칙</h2></summary>
+        <div class="section-body">
+          <div class="flow">
+            <div class="node">Alex<br>목표·제약 지시</div>
+            <div class="node">Paperclip<br>분해·할당·예산</div>
+            <div class="node">에이전트<br>수집·분석·작성</div>
+            <div class="node">검수 게이트<br>근거·완료기준</div>
+            <div class="node">Alex<br>예외·최종 승인</div>
+          </div>
+          <ul class="checklist">
+            <li>Alex에게 올라오는 것은 전체 작업 목록이 아니라 승인·예외·실패 항목입니다.</li>
+            <li>모든 결과는 출처 → 보고서 → Action → 승인 이력으로 추적됩니다.</li>
+            <li>금융 매매 판단, 정부지원사업 신청, 외부 완료처리는 Alex 승인 없이는 실행하지 않습니다.</li>
+            <li>Obsidian은 분석·이력의 장기 기록소, Notion은 외부 운영 상태의 원본으로 분리합니다.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="article-section" id="architecture" open>
+        <summary><h2>4. 목표 아키텍처</h2></summary>
+        <div class="section-body">
+          <div class="flow">
+            <div class="node">수집<br>SerpAPI·공식 공고</div>
+            <div class="node">보강<br>Bright Data</div>
+            <div class="node">조정<br>Paperclip</div>
+            <div class="node">분석·기록<br>Codex·Obsidian</div>
+            <div class="node">상태 동기화<br>Notion API</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>계층</th><th>주요 도구</th><th>책임</th><th>금지·경계</th></tr></thead>
+              <tbody>
+                <tr><td>검색</td><td>SerpAPI</td><td>뉴스 후보와 검색 결과를 구조화해 수집</td><td>검색 결과만으로 사실 확정 금지</td></tr>
+                <tr><td>웹 접근</td><td>Bright Data Unlocker</td><td>차단·CAPTCHA 등 접근 난도가 높은 공개 페이지 보강</td><td>서비스 약관·로봇정책·법적 제한 위반 금지</td></tr>
+                <tr><td>관제</td><td>Paperclip</td><td>회사·조직·목표·과제·예산·승인·감사로그</td><td>도메인 분석 도구로 오인하지 않음</td></tr>
+                <tr><td>실행</td><td>Codex 에이전트</td><td>조사, 교차검증, 보고서, Action 점검</td><td>고영향 결정을 자동 승인하지 않음</td></tr>
+                <tr><td>기록</td><td>Obsidian</td><td>분석 원본, 근거, 프로젝트 이력, 지식 축적</td><td>외부 운영 상태의 단일 원본으로 혼용 금지</td></tr>
+                <tr><td>운영 상태</td><td>Notion</td><td>Investment Reports·Action Center 운영 상태</td><td>안정 식별자 없이 양방향 동기화 금지</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+
+      <details class="article-section" id="organization" open>
+        <summary><h2>5. Paperclip 에이전트 조직안</h2></summary>
+        <div class="section-body">
+          <div class="org">
+            <div class="org-top"><b>Alex · Board / Final Approver</b><br><small>목표·예산·예외·외부 상태 변경 승인</small></div>
+            <div class="org-row">
+              <div class="role"><b>Chief of Staff</b><small>지시 분해·우선순위·종합 브리핑</small></div>
+              <div class="role"><b>Investment Lead</b><small>시장·기업·리스크 분석</small></div>
+              <div class="role"><b>Public Program Lead</b><small>정부지원사업·Smart Factory 공고</small></div>
+              <div class="role"><b>QA & Records</b><small>근거·중복·완료기준·Obsidian 기록</small></div>
+            </div>
+          </div>
+          <h3>전문 에이전트</h3>
+          <div class="cards">
+            <div class="card"><strong>News Scout</strong><p>SerpAPI로 후보 뉴스를 수집하고 시간·출처·중복을 정규화합니다.</p></div>
+            <div class="card"><strong>Web Evidence Collector</strong><p>직접 접근 실패 시에만 Bright Data를 사용해 원문 근거를 확보합니다.</p></div>
+            <div class="card"><strong>Investment Analyst</strong><p>시장 영향, 관련 기업, 반대 근거, 신뢰도와 후속 Action을 작성합니다.</p></div>
+            <div class="card"><strong>Program Analyst</strong><p>공고 자격·마감·지원 범위·필요 서류와 신청 판단 포인트를 정리합니다.</p></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="article-section" id="workflows" open>
+        <summary><h2>6. 핵심 워크플로우</h2></summary>
+        <div class="section-body">
+          <h3>A. 투자위원회 모닝 브리핑</h3>
+          <div class="flow">
+            <div class="node">예약 트리거</div><div class="node">뉴스 후보 수집</div><div class="node">공식·원문 검증</div><div class="node">보고서·Action 생성</div><div class="node">Alex 승인 큐</div>
+          </div>
+          <p>기존 웹 Codex 예약 업무는 일정 트리거로 유지하되, 생성된 작업과 결과·비용·승인은 Paperclip에 귀속시킵니다. SerpAPI는 빠른 후보 검색, Bright Data는 원문 접근 실패 시 보강 수단으로 사용합니다.</p>
+          <h3>B. Smart Factory·정부지원사업</h3>
+          <div class="flow">
+            <div class="node">공식기관 목록</div><div class="node">신규·변경 탐지</div><div class="node">자격·마감 추출</div><div class="node">적합성·리스크 평가</div><div class="node">신청 검토 요청</div>
+          </div>
+          <p>정부사업은 공식 공고를 최우선 근거로 사용합니다. 신규 사업 탐지는 자동화할 수 있지만, 신청 여부·예산 투입·대외 제출은 항상 Alex 승인으로 남깁니다.</p>
+        </div>
+      </details>
+
+      <details class="article-section" id="notion-loop" open>
+        <summary><h2>7. Notion → Obsidian → Notion 폐쇄 루프</h2></summary>
+        <div class="section-body">
+          <div class="flow">
+            <div class="node">Notion<br>대상 조회</div><div class="node">Obsidian<br>작업 사본</div><div class="node">Agent<br>분석·완료검사</div><div class="node">Alex<br>승인</div><div class="node">Notion<br>완료 반영</div>
+          </div>
+          <div class="callout tip">
+            <div class="callout-title">권고 동기화 방식</div>
+            Import 플러그인은 초기·수동 스냅샷 보조 수단으로 유지하고, 운영 자동화는 Notion API를 사용합니다. 각 문서에 <b>Notion Page ID</b>, Report ID, Action ID, 마지막 동기화 시각, 원본 수정 시각을 저장해야 중복과 역전 업데이트를 막을 수 있습니다.
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>단계</th><th>읽기/쓰기</th><th>검증</th><th>실패 시 처리</th></tr></thead>
+            <tbody>
+              <tr><td>대상 조회</td><td>Notion → Agent</td><td>Status, Approval, Due Date, Page ID</td><td>누락 필드면 보류 큐</td></tr>
+              <tr><td>분석 기록</td><td>Agent → Obsidian</td><td>출처·수치·시각·관련 보고서</td><td>충돌 노트 생성</td></tr>
+              <tr><td>완료 판정</td><td>Agent 내부</td><td>완료기준 8항목</td><td>미충족 항목을 Alex에게 요약</td></tr>
+              <tr><td>승인</td><td>Alex → Paperclip</td><td>승인자·시각·결정 근거</td><td>대기 유지</td></tr>
+              <tr><td>상태 반영</td><td>Agent → Notion</td><td>Page ID·원본 수정 시각 재확인</td><td>409/권한/스키마 오류 기록</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </details>
+
+      <details class="article-section" id="automation" open>
+        <summary><h2>8. 자동화 수준 비교</h2></summary>
+        <div class="section-body">
+          <div class="table-wrap"><table>
+            <thead><tr><th>안</th><th>장점</th><th>단점·위험</th><th>판정</th></tr></thead>
+            <tbody>
+              <tr><td><b>A. 수동 유지</b></td><td>변경 위험이 낮음</td><td>Alex가 계속 자료 생산자·상태 관리자 역할을 수행</td><td>목표 불충족</td></tr>
+              <tr><td><b>B. 반자동</b></td><td>수집·분석·기록은 자동, 승인과 외부 완료는 사람이 통제</td><td>초기에는 승인 큐 운영이 필요</td><td><b>1차 권고</b></td></tr>
+              <tr><td><b>C. 조건부 자동</b></td><td>정형·저위험 항목의 처리 속도 향상</td><td>식별자·충돌관리·신뢰도 규칙이 충분히 검증돼야 함</td><td>2차 확장</td></tr>
+              <tr><td><b>D. 전면 자동</b></td><td>사람 개입 최소</td><td>금융·정부사업 판단 오류와 외부 상태 오염 위험</td><td>현재 비권고</td></tr>
+            </tbody>
+          </table></div>
+          <p><b>조건부 자동화 허용 후보:</b> 공식 출처가 확인되고, 필수 필드가 완전하며, 중복·충돌이 없고, 영향도가 낮은 상태 업데이트 또는 자료 보강.</p>
+          <p><b>항상 승인:</b> 매수·매도 결론, 정부사업 신청, 대외 제출, 고비용 크롤링, 상충 근거가 있는 보고서, Notion 완료 처리 정책 변경.</p>
+        </div>
+      </details>
+
+      <details class="article-section" id="controls" open>
+        <summary><h2>9. 통제와 완료 기준</h2></summary>
+        <div class="section-body">
+          <h3>Action 완료 기준</h3>
+          <ul class="checklist">
+            <li>관련 Investment Report가 연결되어 있다.</li>
+            <li>확인 날짜와 원문 출처가 기록되어 있다.</li>
+            <li>핵심 사실·수치가 교차검증되어 있다.</li>
+            <li>투자 또는 정부사업 관점의 의미가 작성되어 있다.</li>
+            <li>후속 행동 또는 보류 이유가 명시되어 있다.</li>
+            <li>Confidence와 Impact가 기록되어 있다.</li>
+            <li>Obsidian 분석 결과가 저장되어 있다.</li>
+            <li>Alex 승인 이후에만 Notion 완료 상태가 변경된다.</li>
+          </ul>
+          <h3>운영 통제</h3>
+          <div class="cards">
+            <div class="card"><strong>비용 통제</strong><p>에이전트별·프로젝트별 예산과 크롤링 한도를 설정하고 초과 시 자동 중지합니다.</p></div>
+            <div class="card"><strong>비밀정보 통제</strong><p>API 키는 문서·로그에 기록하지 않고 비밀 저장소 참조만 허용합니다.</p></div>
+            <div class="card"><strong>감사 추적</strong><p>과제·출처·산출물·승인·Notion 변경을 같은 작업 ID로 연결합니다.</p></div>
+            <div class="card"><strong>롤백</strong><p>상태 변경 전 원본 값을 저장하고, 오류 시 되돌릴 수 있는 변경 기록을 남깁니다.</p></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="article-section" id="roadmap" open>
+        <summary><h2>10. 단계별 구축 로드맵</h2></summary>
+        <div class="section-body">
+          <div class="timeline">
+            <div class="phase"><b>0단계 · 승인·현황 고정</b><br>회사 목표, 두 운영 트랙, 승인 항목, Notion 데이터 원본과 식별자를 확정합니다.</div>
+            <div class="phase"><b>1단계 · 로컬 Paperclip 파일럿</b><br>local_trusted 모드에서 회사·조직·목표·예산·승인 게이트와 Codex Local adapter를 검증합니다.</div>
+            <div class="phase"><b>2단계 · 읽기 전용 데이터 파일럿</b><br>SerpAPI·공식 공고·Notion 읽기와 Obsidian 초안 생성까지만 연결합니다.</div>
+            <div class="phase"><b>3단계 · 승인 후 상태 반영</b><br>Alex 승인된 Action만 Notion API로 완료 처리하고 충돌·권한·재시도 로그를 검증합니다.</div>
+            <div class="phase"><b>4단계 · 조건부 자동화</b><br>저위험·정형 항목만 자동 처리하며, 금융 판단과 정부사업 신청은 승인 대상으로 유지합니다.</div>
+          </div>
+          <div class="callout warn"><div class="callout-title">아직 실행하지 않는 것</div>Paperclip 설치, Bright Data·Notion API 키 연결, 웹 Codex 예약 업무 변경, Notion 상태 쓰기는 본 기획안 승인 후 별도 구축 단계에서 수행합니다.</div>
+        </div>
+      </details>
+
+      <details class="article-section" id="approval" open>
+        <summary><h2>11. Alex 승인 요청 항목</h2></summary>
+        <div class="section-body">
+          <ol>
+            <li>프로젝트 명칭: <b>Alex LAB Agent Center — Market Intelligence & Public Program OS</b></li>
+            <li>1차 운영 방식: <b>반자동</b>, 외부 완료처리는 Alex 승인 후 수행</li>
+            <li>우선 파일럿: Investment 모닝 브리핑과 Action Center 1개 업무 묶음</li>
+            <li>2차 파일럿: Smart Factory·정부지원사업 공식 공고 추적</li>
+            <li>Notion 동기화 방식: Import는 보조, API 기반 안정 식별자 방식으로 전환</li>
+          </ol>
+          <div class="callout tip"><div class="callout-title">승인 후 바로 할 일</div>로컬 환경 진단 → Paperclip 설치·롤백안 확정 → 조직·예산·승인 게이트 구성 → 읽기 전용 파일럿 → 결과 검수 순서로 진행합니다.</div>
+        </div>
+      </details>
+
+      <details class="article-section" id="sources">
+        <summary><h2>12. 근거와 제작 정보</h2></summary>
+        <div class="section-body">
+          <h3>공식 기술 근거</h3>
+          <ol class="source-list">
+            <li><a href="https://github.com/paperclipai/paperclip/blob/master/doc/PRODUCT.md" target="_blank" rel="noopener noreferrer">Paperclip PRODUCT — control plane, 조직·목표·예산·승인 원칙</a></li>
+            <li><a href="https://github.com/paperclipai/paperclip" target="_blank" rel="noopener noreferrer">Paperclip 공식 저장소 — quickstart와 local_trusted 운영</a></li>
+            <li><a href="https://github.com/paperclipai/paperclip/blob/master/docs/adapters/overview.md" target="_blank" rel="noopener noreferrer">Paperclip Adapters — Codex Local 연결</a></li>
+            <li><a href="https://serpapi.com/google-news-api" target="_blank" rel="noopener noreferrer">SerpAPI Google News API</a></li>
+            <li><a href="https://docs.brightdata.com/scraping-automation/web-unlocker/introduction" target="_blank" rel="noopener noreferrer">Bright Data Web Unlocker API</a></li>
+            <li><a href="https://developers.notion.com/reference/patch-page" target="_blank" rel="noopener noreferrer">Notion Update page API</a></li>
+          </ol>
+          <h3>로컬 근거</h3>
+          <ul class="source-list">
+            <li>2026-07-17 Codex 운영일지: Paperclip 설치·설정·배포 미실행</li>
+            <li>Notion Import 자료: Investment Reports, Action Center 필드와 연결 상태</li>
+            <li>Paperclip × Bright Data 시장조사 풀 가이드 Clipping: 구축 복잡도와 비용·토큰 주의점</li>
+          </ul>
+          <div class="attribution">
+            <b>제작 도구</b> Codex Desktop + alex-task-effort-advisor<br>
+            <b>권고 모델·추론</b> gpt-5.6-sol · High<br>
+            <b>사용자 선택</b> gpt-5.6-sol · High<br>
+            <b>선택 적용 상태</b> 사용자 선택 기준으로 작성했으며 세션의 실제 런타임 모델은 독립 검증하지 않음<br>
+            <b>작성·검증 시각</b> 2026-07-19 17:50 KST<br>
+            <b>검증 상태</b> 공식 문서·로컬 Vault 근거 검증 완료 / 외부 구축·연동은 미실행
+          </div>
+        </div>
+      </details>
+    </main>
+  </div>
+
+  <footer><div class="layout">Alex LAB · Shareable Article · alex-lab-article-v1 기반</div></footer>
+  <script>
+    const sections=[...document.querySelectorAll("details.article-section")];
+    const links=[...document.querySelectorAll("nav a")];
+    const progress=document.querySelector("#progress");
+    document.querySelector("#expand-all").addEventListener("click",()=>sections.forEach(section=>section.open=true));
+    document.querySelector("#collapse-all").addEventListener("click",()=>sections.forEach(section=>section.open=false));
+    links.forEach(link=>link.addEventListener("click",()=>{const section=document.querySelector(link.getAttribute("href"));if(section)section.open=true;}));
+    const updateProgress=()=>{const root=document.documentElement;const distance=root.scrollHeight-root.clientHeight;const ratio=distance>0?root.scrollTop/distance:0;progress.style.width=`${Math.min(100,Math.max(0,ratio*100))}%`;};
+    addEventListener("scroll",updateProgress,{passive:true});addEventListener("resize",updateProgress);updateProgress();
+    if("IntersectionObserver" in window){const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(!entry.isIntersecting)return;links.forEach(link=>link.classList.toggle("active",link.hash===`#${entry.target.id}`));}),{rootMargin:"-20% 0px -70% 0px"});sections.forEach(section=>observer.observe(section));}
+  </script>
+</body>
+</html>
