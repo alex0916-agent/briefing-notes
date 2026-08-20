@@ -8,16 +8,24 @@
   :root { color-scheme: dark; }
   body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; background: #0f1115; color: #e8eaed; line-height: 1.55; }
   main { max-width: 720px; margin: 0 auto; padding: 24px 16px 72px; }
-  h1 { font-size: 1.32rem; margin: 0 0 8px; }
+  h1 { font-size: 1.32rem; margin: 8px 0; }
   h2 { font-size: 1.05rem; margin: 28px 0 10px; border-bottom: 1px solid #2a2f3a; padding-bottom: 6px; }
-  h3 { font-size: 1rem; margin: 0 0 6px; }
+  h3 { font-size: 1rem; margin: 0 0 8px; }
   .meta { color: #9aa0a6; font-size: .9rem; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #3d2a00; color: #ffcc66; font-size: .8rem; }
   a { color: #8ab4f8; }
   .card { border: 1px solid #2a2f3a; border-radius: 12px; padding: 14px 16px; margin: 12px 0; background: #161a22; }
-  .tag { font-size: .75rem; color: #9aa0a6; margin: 0 0 8px; }
-  .gap { color: #f28b82; }
-  .ok { color: #81c995; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+  .b { display: inline-flex; align-items: baseline; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: .78rem; font-weight: 650; white-space: nowrap; }
+  .b em { font-style: normal; font-size: .68rem; letter-spacing: .04em; opacity: .8; font-weight: 700; }
+  .ok { background: #16351f; color: #81c995; }
+  .new { background: #0e2f4a; color: #8ab4f8; }
+  .upd { background: #3d2a00; color: #ffcc66; }
+  .gap { background: #3a1515; color: #f28b82; }
+  .sec { background: #2a2438; color: #c58af9; }
+  .pa { background: #3d2a00; color: #ffcc66; }
+  .a { background: #3a1515; color: #f28b82; }
+  .bb { background: #3d2a00; color: #ffcc66; }
+  .c { background: #1e2430; color: #9aa0a6; }
   ul { padding-left: 1.2rem; }
   li { margin: 4px 0; }
   table { width: 100%; border-collapse: collapse; font-size: .9rem; }
@@ -29,163 +37,223 @@
 </head>
 <body>
 <main>
-  <p class="badge">PARTIAL · 파일럿</p>
-  <h1>Smart HACCP 식품저널 Weekly Brief</h1>
-  <p class="meta">2026-08-20 · research / grok-4.6 · Net-New 1 + UPDATE 1 · 실행 권한 없음</p>
+  <div class="row">
+    <span class="b pa"><em>PARTIAL</em> 부분완료</span>
+    <span class="b c"><em>PILOT</em> 파일럿</span>
+    <span class="b new"><em>NEW</em> 신규 1</span>
+    <span class="b upd"><em>UPD</em> 갱신 1</span>
+  </div>
+  <h1>Smart HACCP 식품저널 주간 브리핑</h1>
+  <p class="meta">2026-08-20 · research / grok-4.6 · 실행 권한 없음</p>
 
-  <h2>1. Executive Summary</h2>
+  <h2>1. 핵심 요약</h2>
   <ol>
-    <li><strong class="ok">CONFIRMED Net-New.</strong> 한·중 식품안전 협력 3건 — 기업 등록 간소화, 고기성분 라면 위생요건, 수산물 전자증명. 08-20 오전 식품저널 메일에는 없음.</li>
-    <li><strong class="ok">CONFIRMED UPDATE.</strong> 수출식품 위생증명 질의응답집 개정. 법령 개정이 아님. Baseline의 “위생증명서 개선” 후속.</li>
-    <li>풀무원 춘천 얼음공장 4대 인증(일반·스마트·글로벌 HACCP + FSSC 22000)은 기업 원문만 확인. 인증번호 GAP.</li>
-    <li>마른김 위생 협력·할랄 수출 지원은 공식 원문 미완. 식품저널만으로는 확정하지 않음.</li>
-    <li>2028 농림식품 R&amp;D 통합 수요조사는 IPET 목록만 확인. 공고 본문 타임아웃.</li>
+    <li>
+      <span class="b ok"><em>OK</em> 확정</span>
+      <span class="b new"><em>NEW</em> 신규</span>
+      한·중 식품안전 협력 3건 — 기업 등록 간소화, 고기성분 라면 위생요건, 수산물 전자증명. 08-20 오전 식품저널 메일에는 없음.
+    </li>
+    <li>
+      <span class="b ok"><em>OK</em> 확정</span>
+      <span class="b upd"><em>UPD</em> 갱신</span>
+      수출식품 위생증명 질의응답집 개정. 법령 개정이 아님. 기존 “위생증명서 개선” 후속.
+    </li>
+    <li>
+      <span class="b gap"><em>GAP</em> 미확인</span>
+      풀무원 춘천 얼음공장 4대 인증은 기업 원문만 확인. 인증번호 없음.
+    </li>
+    <li>
+      <span class="b sec"><em>SEC</em> 이차출처</span>
+      마른김 위생 협력·할랄 수출 지원은 공식 원문 미완.
+    </li>
+    <li>
+      <span class="b gap"><em>GAP</em> 미확인</span>
+      2028 농림식품 R&amp;D 통합 수요조사는 목록만. 공고 본문 시간초과.
+    </li>
   </ol>
 
-  <h2>2. HACCP / Food Safety</h2>
+  <h2>2. HACCP / 식품안전</h2>
   <div class="card">
+    <div class="row">
+      <span class="b c"><em>C</em> 후순위</span>
+      <span class="b ok"><em>OK</em> 확정</span>
+      <span class="b gap"><em>GAP</em> 미확인</span>
+    </div>
     <h3>풀무원 춘천 얼음공장, 글로벌 HACCP</h3>
-    <p class="tag">기업 원문 CONFIRMED · 인증원 등록·인증번호 GAP</p>
     <ul>
-      <li>What Changed: 국내 식용 얼음 전문 공장 최초 글로벌 HACCP. 봉지얼음 8종·컵아이스 3종. 2018 FSSC 22000, 2023 스마트 HACCP, 올해 글로벌 HACCP.</li>
-      <li>Why It Matters: 스마트 HACCP이 단독이 아니라 글로벌/FSSC와 묶인 실제 공장 사례. Food Defense 포함이라고 기업이 설명.</li>
-      <li>AlexLAB: 제안서 레퍼런스 후보. 발급 주체·인증번호는 미확인이라 대외 인용 금지.</li>
-      <li>Priority: C</li>
+      <li>변화: 국내 식용 얼음 전문 공장 최초 글로벌 HACCP. 봉지얼음 8종·컵아이스 3종. 2018 FSSC 22000, 2023 스마트 HACCP, 올해 글로벌 HACCP.</li>
+      <li>의미: 스마트 HACCP이 단독이 아니라 글로벌/FSSC와 묶인 공장 사례. 식품보안(Food Defense) 포함이라고 기업이 설명.</li>
+      <li>AlexLAB: 제안서 참고 후보. 발급 주체·인증번호 미확인이라 대외 인용 금지.</li>
     </ul>
     <p><a href="https://news.pulmuone.co.kr/pulmuone/newsroom/viewNewsroom.do?id=3909">풀무원 뉴스룸</a> ·
        <a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119781">식품저널</a></p>
   </div>
   <div class="card">
+    <div class="row">
+      <span class="b c"><em>C</em> 후순위</span>
+      <span class="b sec"><em>SEC</em> 이차출처</span>
+    </div>
     <h3>해썹인증원–마른김생산자연합회 위생 협력</h3>
-    <p class="tag gap">UNVERIFIED_SECONDARY · 인증원 보도 미확인</p>
     <ul>
       <li>식품저널: 08-18 광주지원에서 단순처리 농산물(마른김) 자율점검 시범사업 협력.</li>
       <li>공식 원문 없음. 업종 확장 신호로만 기록.</li>
-      <li>Priority: C</li>
     </ul>
     <p><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119805">식품저널</a></p>
   </div>
-  <p class="muted">학교급식 입찰 제한, HACCP 교육훈련 일원화, QR 성적서: Baseline 기보고 → 재보고 안 함.</p>
+  <p class="muted">학교급식 입찰 제한, HACCP 교육훈련 일원화, QR 성적서: 기존 보고 → 재보고 안 함.</p>
 
-  <h2>3. AI / Autonomous Manufacturing / Smart Factory</h2>
-  <p>신규 중요 변화 없음. 풀무원 건은 인증이지 신규 AI 구축 발표가 아님. 팔도 나주 AI 자율제조, CJ Food AI 360은 Baseline.</p>
+  <h2>3. AI / 자율제조 / 스마트공장</h2>
+  <p>신규 중요 변화 없음. 풀무원 건은 인증이지 신규 AI 구축 발표가 아님. 팔도 나주 AI 자율제조, CJ Food AI 360은 기존 보고.</p>
 
-  <h2>4. Regulation / Labeling / Advertising</h2>
-  <p>신규 중요 변화 없음. 당알코올, AI 가상전문가 광고, 클린라벨 단체표준, 기능성표시식품은 Baseline.</p>
+  <h2>4. 규제 / 표시 / 광고</h2>
+  <p>신규 중요 변화 없음. 당알코올, AI 가상전문가 광고, 클린라벨 단체표준, 기능성표시식품은 기존 보고.</p>
 
-  <h2>5. Standards / Certification / Testing</h2>
-  <p>풀무원 글로벌 HACCP / FSSC 스택이 해당. “글로벌 HACCP” 공식 스키마·발급기관은 인증원 원문 GAP.</p>
+  <h2>5. 기준 / 인증 / 시험</h2>
+  <p>풀무원 글로벌 HACCP / FSSC 스택이 해당. “글로벌 HACCP” 공식 체계·발급기관은 인증원 원문 미확인.</p>
 
-  <h2>6. Government Support / Grants</h2>
+  <h2>6. 정부지원 / 보조금</h2>
   <div class="card">
+    <div class="row">
+      <span class="b c"><em>C</em> 후순위</span>
+      <span class="b ok"><em>OK</em> 확정</span>
+      <span class="b gap"><em>GAP</em> 미확인</span>
+    </div>
     <h3>2028 농림식품 R&amp;D 통합 수요조사</h3>
-    <p class="tag">목록 CONFIRMED · 공고 본문 타임아웃</p>
     <ul>
       <li>IPET 공지 목록 tbl_id=28159, 게시 2026-08-14.</li>
-      <li>마감·서식·대상은 본문 미확인. 2차 보도로 단정하지 않음.</li>
-      <li>Priority: C</li>
+      <li>마감·서식·대상은 본문 미확인. 이차 보도로 단정하지 않음.</li>
     </ul>
     <p><a href="https://www.ipet.re.kr/Notice/NoticeVP.asp?tbl_id=28159">IPET 공고</a></p>
   </div>
 
-  <h2>7. Export / Global Market</h2>
+  <h2>7. 수출 / 해외시장</h2>
   <div class="card">
+    <div class="row">
+      <span class="b a"><em>A</em> 최우선</span>
+      <span class="b ok"><em>OK</em> 확정</span>
+      <span class="b new"><em>NEW</em> 신규</span>
+    </div>
     <h3>한·중 식품안전 협력 3건</h3>
-    <p class="tag ok">CONFIRMED Net-New · 식약처 보도자료 seq=50284 · 2026-08-20</p>
     <ul>
-      <li>What Changed: 다롄 APEC 세관-기업 대화에서 해관총서와 협력문서 3건 서명.</li>
+      <li>변화: 다롄 APEC 세관-기업 대화에서 해관총서와 협력문서 3건 서명.</li>
       <li>등록 간소화: 식품안전나라 통합민원창구 → 식약처 검토 후 중국 인정. 축산물 제외 대부분, 기존 개별 신청 대비 단축(식품저널: 약 3개월→10일).</li>
       <li>라면: 중국 인정 국가 원료육 + 합의 열처리 등 위생요건 충족 시 미량 고기성분 라면 수출 가능.</li>
-      <li>수산물: 종이 위생증명 → 정부 간 전자증명(E-certificate).</li>
-      <li>Why It Matters: 수출 컨설팅·등록 대행 메시지에 바로 씀. 세부 요건은 식약처 업계 간담회 예정.</li>
+      <li>수산물: 종이 위생증명 → 정부 간 전자증명.</li>
+      <li>의미: 수출 컨설팅·등록 대행 메시지에 바로 씀. 세부 요건은 식약처 업계 간담회 예정.</li>
       <li>AlexLAB: 중국 수출 파이프 최우선. 축산물은 간소화 제외.</li>
-      <li>Priority: A</li>
     </ul>
     <p><a href="https://www.mfds.go.kr/brd/m_99/view.do?seq=50284">식약처 보도자료</a> ·
        <a href="https://www.mfds.go.kr/brd/m_99/down.do?brd_id=ntc0021&amp;seq=50284&amp;data_tp=A&amp;file_seq=2">PDF</a> ·
        <a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119828">식품저널</a></p>
   </div>
   <div class="card">
+    <div class="row">
+      <span class="b bb"><em>B</em> 중요</span>
+      <span class="b ok"><em>OK</em> 확정</span>
+      <span class="b upd"><em>UPD</em> 갱신</span>
+    </div>
     <h3>수출 위생증명 질의응답집 개정</h3>
-    <p class="tag ok">CONFIRMED UPDATE · 식약처 보도참고 seq=50281</p>
     <ul>
-      <li>What Changed: 신청 기재·재발급·반려 후 재신청·출력 방법 안내 개정. 누리집 개편 반영.</li>
-      <li>법령·발급 요건 변경 아님. Baseline “위생증명서 개선”의 후속 안내.</li>
-      <li>Priority: B</li>
+      <li>변화: 신청 기재·재발급·반려 후 재신청·출력 방법 안내 개정. 누리집 개편 반영.</li>
+      <li>법령·발급 요건 변경 아님. 기존 “위생증명서 개선”의 후속 안내.</li>
     </ul>
     <p><a href="https://www.mfds.go.kr/brd/m_99/view.do?seq=50281">식약처 보도참고</a> ·
        <a href="https://www.mfds.go.kr/brd/m_99/down.do?brd_id=ntc0021&amp;seq=50281&amp;data_tp=A&amp;file_seq=2">PDF</a> ·
        <a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119818">식품저널</a></p>
   </div>
   <div class="card">
+    <div class="row">
+      <span class="b c"><em>C</em> 후순위</span>
+      <span class="b sec"><em>SEC</em> 이차출처</span>
+    </div>
     <h3>식품진흥원 할랄 수출 지원</h3>
-    <p class="tag gap">UNVERIFIED_SECONDARY · 진흥원 공지 본문 미추출</p>
     <ul>
       <li>식품저널: 08-19 무역협회와 할랄 세미나·1:1 상담. 후속 맞춤 지원 계획.</li>
       <li>공고·지원조건 원문 없음. 확정하지 않음.</li>
-      <li>Priority: C</li>
     </ul>
     <p><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119819">식품저널</a></p>
   </div>
-  <p class="muted">한·인도 CEPA: Baseline(건의 반복) → 재보고 안 함.</p>
+  <p class="muted">한·인도 CEPA: 기존 보고(건의 반복) → 재보고 안 함.</p>
 
-  <h2>8. Cost / Market / Operations</h2>
-  <p>신규 중요 변화 없음. 설탕·곡물·유지류 가격, 고환율은 Baseline.</p>
+  <h2>8. 원가 / 시장 / 운영</h2>
+  <p>신규 중요 변화 없음. 설탕·곡물·유지류 가격, 고환율은 기존 보고.</p>
 
   <h2>우선순위</h2>
   <table>
-    <tr><th>P</th><th>항목</th><th>변화</th><th>Action</th></tr>
-    <tr><td>A</td><td>한·중 등록 간소화·라면·수산물 전자증명</td><td>CONFIRMED Net-New</td><td>간담회·세부요건 추적</td></tr>
-    <tr><td>B</td><td>위생증명 질의응답집 개정</td><td>CONFIRMED UPDATE</td><td>수출 컨설팅 안내에만 반영</td></tr>
-    <tr><td>C</td><td>풀무원 글로벌 HACCP</td><td>기업원문만</td><td>인증번호 확인 전 인용 금지</td></tr>
-    <tr><td>C</td><td>2028 R&amp;D 수요조사</td><td>목록만</td><td>공고 본문 재시도</td></tr>
-    <tr><td>C</td><td>마른김·할랄</td><td>이차 보도만</td><td>공식 원문 없으면 보류</td></tr>
+    <tr><th>순위</th><th>항목</th><th>상태</th><th>조치</th></tr>
+    <tr>
+      <td><span class="b a"><em>A</em> 최우선</span></td>
+      <td>한·중 등록 간소화·라면·수산물 전자증명</td>
+      <td><span class="b ok"><em>OK</em> 확정</span> <span class="b new"><em>NEW</em> 신규</span></td>
+      <td>간담회·세부요건 추적</td>
+    </tr>
+    <tr>
+      <td><span class="b bb"><em>B</em> 중요</span></td>
+      <td>위생증명 질의응답집 개정</td>
+      <td><span class="b ok"><em>OK</em> 확정</span> <span class="b upd"><em>UPD</em> 갱신</span></td>
+      <td>수출 컨설팅 안내에만 반영</td>
+    </tr>
+    <tr>
+      <td><span class="b c"><em>C</em> 후순위</span></td>
+      <td>풀무원 글로벌 HACCP</td>
+      <td><span class="b gap"><em>GAP</em> 미확인</span></td>
+      <td>인증번호 확인 전 인용 금지</td>
+    </tr>
+    <tr>
+      <td><span class="b c"><em>C</em> 후순위</span></td>
+      <td>2028 R&amp;D 수요조사</td>
+      <td><span class="b gap"><em>GAP</em> 미확인</span></td>
+      <td>공고 본문 재시도</td>
+    </tr>
+    <tr>
+      <td><span class="b c"><em>C</em> 후순위</span></td>
+      <td>마른김·할랄</td>
+      <td><span class="b sec"><em>SEC</em> 이차출처</span></td>
+      <td>공식 원문 없으면 보류</td>
+    </tr>
   </table>
 
-  <h2>Action List</h2>
+  <h2>조치 목록</h2>
   <ul>
-    <li>식약처 한·중 세부 안내 간담회 일정 확인 — ACTION_CANDIDATE</li>
-    <li>풀무원 글로벌 HACCP 인증번호·발급 주체 — ACTION_CANDIDATE</li>
-    <li>인증원 마른김 보도자료 — ACTION_CANDIDATE</li>
-    <li>IPET tbl_id=28159 공고 본문 — ACTION_CANDIDATE</li>
+    <li>식약처 한·중 세부 안내 간담회 일정 확인 — <span class="b c"><em>ACT</em> 조치후보</span></li>
+    <li>풀무원 글로벌 HACCP 인증번호·발급 주체 — <span class="b c"><em>ACT</em> 조치후보</span></li>
+    <li>인증원 마른김 보도자료 — <span class="b c"><em>ACT</em> 조치후보</span></li>
+    <li>IPET tbl_id=28159 공고 본문 — <span class="b c"><em>ACT</em> 조치후보</span></li>
   </ul>
-  <p class="muted">Task 자동 생성 안 함. Cron 생성·활성화 안 함. 실행 권한 없음.</p>
+  <p class="muted">작업 자동 생성 안 함. 예약 생성·활성화 안 함. 실행 권한 없음.</p>
 
-  <h2>Dedup Log</h2>
-<pre>Candidate Items Reviewed: 28
-Duplicates Excluded: 23
-Material Updates: 1  (위생증명 Q&A)
-Net-New Items: 1     (한·중 협력 3건)
-Baseline hits: HACCP 교육 일원화, QR 성적서, 학교급식 위생/입찰, 팔도 AI, CJ Food AI 360,
+  <h2>중복제거</h2>
+<pre>검토 후보 28 · 중복 제외 23 · 갱신 1(위생증명 Q&A) · 신규 1(한·중 협력 3건)
+기존 보고: HACCP 교육 일원화, QR 성적서, 학교급식 위생/입찰, 팔도 AI, CJ Food AI 360,
 당알코올, AI 광고, 클린라벨, 기능성표시, 공유공장, CEPA, 설탕·곡물 가격, 자동화 필요성,
-수출 위생증명서 개선(당시 보도 → 이번 UPDATE)</pre>
+수출 위생증명서 개선(당시 보도 → 이번 갱신)</pre>
 
-  <h2>Cron Status</h2>
-<pre>Smart HACCP Weekly Brief: N/A — 등록된 job 없음
-Government Support / Smart Factory / Food-Tech Monitor: 없음
-PAUSED — No schedule modification performed</pre>
+  <h2>예약 상태</h2>
+<pre>Smart HACCP 주간 브리프: 해당 없음 — 등록된 작업 없음
+정부지원 / 스마트공장 / 푸드테크 모니터: 없음
+일시정지 — 일정 변경 없음</pre>
 
-  <h2>Kanban Status</h2>
-<pre>Related: t_25f3984a  ready  [research] Smart HACCP 식품저널 Brief 2026-08-20
-In Progress / Blocked / Waiting Approval: 없음 (이 Brief 범위)
-Done Since Last Brief: 없음
-New Action Candidates: 4 (위 목록, 미생성)
-검수용 카드. dispatcher worker 아님.</pre>
+  <h2>칸반 상태</h2>
+<pre>관련: t_25f3984a  ready  [research] Smart HACCP 식품저널 Brief 2026-08-20
+진행 / 차단 / 승인대기: 없음
+직전 이후 완료: 없음
+신규 조치후보: 4 (미생성)
+검수용 카드. 작업자 아님.</pre>
 
-  <h2>Execution Evidence</h2>
-<pre>Food Journal Outlook Mail Search: PASS
-Food Journal Messages Read: PASS — 최신 2026-08-20 11:40 KST, 이후 신규 메일 0
-Dedup Ledger Check: PASS (지시서 Baseline; 별도 Ledger 파일 없음)
-Government Original Source Check: PARTIAL
-  seq=50284 PDF CONFIRMED · seq=50281 PDF CONFIRMED
-  인증원/진흥원/IPET 본문 GAP
-Cron Read: PASS
-Kanban Read: PASS
-Outlook Auth: PASS (alex0916@outlook.kr)
+  <h2>실행 증거</h2>
+<pre>식품저널 Outlook 검색: 통과
+식품저널 본문 실독: 통과 — 최신 2026-08-20 11:40 KST, 이후 신규 메일 0
+중복제거 장부: 통과 (지시서 기준선; 별도 장부 파일 없음)
+정부 원문: 부분완료
+  seq=50284 PDF 확정 · seq=50281 PDF 확정
+  인증원/진흥원/IPET 본문 미확인
+예약 조회: 통과
+칸반 조회: 통과
+Outlook 인증: 통과 (alex0916@outlook.kr)
 세션: 20260820_191215_ef9385</pre>
 
   <h2>판정</h2>
-  <p><strong>PARTIAL</strong> — 메일 실독·중복제거·한·중/위생증명 원문은 충족. 인증원·진흥원·IPET 본문 3건 미완.</p>
+  <p><span class="b pa"><em>PARTIAL</em> 부분완료</span> 메일 실독·중복제거·한·중/위생증명 원문은 충족. 인증원·진흥원·IPET 본문 3건 미완.</p>
 </main>
 </body>
 </html>
