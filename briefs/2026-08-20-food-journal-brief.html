@@ -15,155 +15,89 @@
   a { color: #8ab4f8; }
   .card { border: 1px solid #2a2f3a; border-radius: 12px; padding: 14px 16px; margin: 12px 0; background: #161a22; }
   .row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
-  .b { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: .78rem; font-weight: 650; white-space: nowrap; }
+  .b { display: inline-flex; padding: 3px 9px; border-radius: 999px; font-size: .78rem; font-weight: 650; }
   .ok { background: #16351f; color: #81c995; }
   .new { background: #0e2f4a; color: #8ab4f8; }
   .upd { background: #3d2a00; color: #ffcc66; }
-  .a { background: #3a1515; color: #f28b82; }
   .c { background: #1e2430; color: #9aa0a6; }
   .adj { background: #0e2f4a; color: #8ab4f8; }
   ul { padding-left: 1.2rem; }
-  li { margin: 4px 0; }
+  li { margin: 6px 0; }
   table { width: 100%; border-collapse: collapse; font-size: .88rem; }
   th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #2a2f3a; vertical-align: top; }
-  th { color: #9aa0a6; font-weight: 600; }
-  pre { background: #11141a; border: 1px solid #2a2f3a; border-radius: 8px; padding: 12px; overflow-x: auto; font-size: .8rem; color: #c5c9d0; white-space: pre-wrap; }
+  th { color: #9aa0a6; }
   .muted { color: #9aa0a6; font-size: .88rem; }
-  dt { color: #9aa0a6; font-size: .78rem; margin-top: 8px; }
-  dd { margin: 0 0 4px; }
   .sys { margin-top: 40px; border-top: 1px solid #2a2f3a; padding-top: 16px; color: #9aa0a6; }
-  .sys > summary { cursor: pointer; font-weight: 650; color: #e8eaed; font-size: 1.05rem; }
-  .sys .sub { margin: 12px 0; }
-  .sys .sub > summary { cursor: pointer; font-weight: 600; color: #c5c9d0; }
+  .sys > summary { cursor: pointer; font-weight: 650; color: #e8eaed; }
 </style>
 </head>
 <body>
 <main>
   <div class="row">
-    <span class="b ok">정보 완료</span>
-    <span class="b upd">조사 부분 완료</span>
-    <span class="b ok">운영 통과</span>
-    <span class="b new">순수 신규 1</span>
-    <span class="b upd">변경 1</span>
+    <span class="b ok">식품저널 메일</span>
+    <span class="b new">수신 11:40</span>
+    <span class="b upd">이후 신규 메일 없음</span>
   </div>
   <h1>AlexLAB 식품저널 아침 브리핑</h1>
-  <p class="meta">2026-08-20 · Outlook 식품저널 뉴스레터 · 스마트해썹 주간 브리핑이 아닙니다. 스마트해썹·스마트공장은 해석 관점입니다.</p>
+  <p class="meta">2026-08-20 · Outlook 식품저널 뉴스레터 1통 · 스마트해썹 주간 브리핑이 아닙니다</p>
 
   <h2>1. 오늘의 핵심 뉴스</h2>
   <ul>
-    <li><span class="b a">즉시 검토</span> <span class="b new">보충 조사</span> 한·중 식품안전 협력 3건 — 등록 간소화, 라면 위생요건, 수산물 전자증명. 오전 식품저널 메일에는 없습니다.</li>
-    <li><span class="b c">참고</span> <span class="b ok">식품저널 메일</span> 수출 위생증명 질의응답집 개정. 법령 변경은 아닙니다.</li>
-    <li>스마트공장·인공지능 신규 구축 소식은 없습니다.</li>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119818">수출식품 위생증명서 발급이 쉬워진다</a> — 신청·재발급 안내 개정. 법령 변경은 아닙니다.</li>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119821">동원F&amp;B, 양반김에 질소충전공법 적용</a> — 포장 공정으로 수출 신선도를 잡는 사례입니다.</li>
+    <li>구내식당 스마트팜 채소 활용(CJ프레시웨이) — 오늘 메일에 실렸으나 동일 제목의 공개 기사는 2022년 건과 겹칩니다. 신규 구축으로 단정하지 않습니다. <a href="https://www.foodnews.co.kr/edit/adminMailSourceView.html?idxno=3269">뉴스레터 원문</a></li>
   </ul>
 
   <h2>2. 식품산업 주요 변화</h2>
-  <div class="card">
-    <h3>한·중 수출 절차가 바뀌었습니다</h3>
-    <p>식품안전나라 통합민원을 식약처가 검토한 뒤 중국이 인정합니다(축산물 제외). 인정국 원료육과 합의된 열처리를 충족하면 미량 고기성분 라면 수출이 가능합니다. 수산물은 종이 위생증명에서 정부 간 전자증명으로 바뀝니다.</p>
-    <p class="muted"><a href="https://www.mfds.go.kr/brd/m_99/view.do?seq=50284">식약처 보도자료</a> · <a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119828">식품저널(2차 출처)</a></p>
-  </div>
-  <p>위생증명 질의응답집, 풀무원 인증 발표, 마른김·할랄·연구개발 수요조사는 아래 주의·관찰입니다. 브랜드 홍보성 기사는 제외했습니다.</p>
+  <ul>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119819">식품진흥원 할랄 수출 지원 세미나</a></li>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119812">농식품부, 추석 성수품 선제 대응</a></li>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119782">팔도·hy ‘아리’, 일본·캐나다 공략</a></li>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119779">남양유업 상반기 매출 +7.9%</a></li>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119781">풀무원 춘천 얼음공장 글로벌 HACCP</a> (기보고)</li>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119805">마른김 위생 협력</a> (기보고)</li>
+    <li><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119811">한·인도 CEPA 원산지 완화 건의</a> (기보고)</li>
+  </ul>
+  <p class="muted">브랜드 홍보·외식 가격·체험 행사는 제외했습니다.</p>
 
   <h2>3. AlexLAB에 미치는 영향</h2>
-  <ul>
-    <li>중국 수출 가공식품 고객 안내와 사전점검 문장을 점검하실 시점입니다.</li>
-    <li>축산물 수출사에는 등록 단축을 적용하지 않으시는 것이 적절합니다.</li>
-    <li>세부 위생요건 발표 전에는 공정·원료 조건을 단정하지 않으시는 것이 좋겠습니다.</li>
-    <li>이번 자동화 제안서를 고치실 필요는 없습니다.</li>
-  </ul>
+  <p>오늘 메일에 즉시 매출로 이어질 규제·지원 공고는 없습니다. 기회는 두 기업 사례를 레퍼런스로 쌓는 쪽입니다.</p>
 
   <h2>4. 컨설팅 사업기회</h2>
   <div class="card">
-    <div class="row">
-      <span class="b a">즉시 검토</span>
-      <span class="b adj">인접 사업</span>
-      <span class="b new">1~3개월</span>
-    </div>
-    <dl>
-      <dt>대상 고객</dt>
-      <dd>중국 수출 예정, HACCP 인증·준비 중인 국내 중소 라면·가열가공·수산물 가공사(축산물 제외).</dd>
-      <dt>고객 과제</dt>
-      <dd>중국 등록 대기, 원료육·열처리 위생증빙.</dd>
-      <dt>AlexLAB 제안</dt>
-      <dd>수출형 HACCP 및 공정증빙 사전점검. 등록 창구 안내와 중요관리점·가열 기록 점검.</dd>
-    </dl>
+    <div class="row"><span class="b adj">인접 사업</span><span class="b c">관찰</span></div>
+    <h3>질소충전 포장 공정</h3>
+    <p>대상: 김·스낵 등 건조 수출 중소 제조사. 과제: 유통 중 산패·수분. 제안: 포장 공정·신선도 관리 점검. 매출 가능 시점: 관찰.</p>
+    <p><a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119821">기사 열기</a></p>
   </div>
-  <p class="muted">위생증명 질의응답은 행정 안내라 단독 컨설팅 상품으로 올리지 않았습니다.</p>
 
   <h2>5. 스마트해썹 관점 사업기회</h2>
-  <div class="card">
-    <p>수산물 전자증명은 디지털 위생증빙·추적 기록 수요와 맞닿습니다. 라면은 가열 중요관리점과 원료육 증빙을 데이터로 남기는 점검이 필요합니다.</p>
-    <p class="muted">매출 가능 시점 1~3개월. 세부 요건 원문이 발동 조건입니다. 센서·비전·기록 자동화 신규 구축 소식은 없습니다.</p>
-  </div>
+  <p>위생증명 안내는 디지털 증빙 수요와 맞닿으나 단독 상품은 아닙니다. <a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119818">기사 열기</a></p>
 
   <h2>6. 스마트공장 관점 사업기회</h2>
-  <p>오늘 메일·보충 조사에서 제조DX, MES, SCADA, 로봇, 자율제조 신규 신호는 없습니다. 팔도 나주 인공지능, CJ Food AI 360은 기존 보고입니다.</p>
+  <p>스마트팜 급식 연계는 선행 신호입니다. 오늘 메일 제목과 2022년 공개 기사가 같아, 신규 투자로 보지 않습니다. <a href="https://www.foodnews.co.kr/edit/adminMailSourceView.html?idxno=3269">뉴스레터 원문</a></p>
 
   <h2>7. 주의할 규제·시장 변화</h2>
-  <table>
-    <tr><th>항목</th><th>판단</th></tr>
-    <tr><td>축산물 등록 간소화 제외</td><td>‘3개월에서 10일’ 안내 적용 대상 아님</td></tr>
-    <tr><td>위생증명 질의응답집 개정</td><td>참고. 법령 아님. 행정 안내</td></tr>
-    <tr><td>풀무원 글로벌 HACCP</td><td>기업 발표만. 인증번호 전 인용 보류</td></tr>
-    <tr><td>마른김·할랄·2028 연구개발</td><td>공식 본문 전 관찰</td></tr>
-  </table>
-  <p class="muted"><a href="https://www.mfds.go.kr/brd/m_99/view.do?seq=50281">위생증명</a> · <a href="https://news.pulmuone.co.kr/pulmuone/newsroom/viewNewsroom.do?id=3909">풀무원</a> · <a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119805">마른김</a> · <a href="https://www.foodnews.co.kr/news/articleView.html?idxno=119819">할랄</a> · <a href="https://www.ipet.re.kr/Notice/NoticeVP.asp?tbl_id=28159">연구개발 공고</a></p>
+  <p>위생증명 개정은 법령이 아닙니다. 할랄·추석은 지원 조건 원문 전 단정하지 않으시는 것이 적절합니다.</p>
 
   <h2>8. 실행 후보</h2>
   <div class="card">
-<pre>신호: 한·중 식품안전 협력 3건 (공식 원문 확인)
-발동 조건: 식약처 세부 위생요건 또는 업계 간담회 일정 발표
-조치: 중국 수출 예정 라면·가열가공·수산물 가공사 식별
+<pre>신호: 양반김 질소충전공법
+발동 조건: 건조 수출 고객 문의 또는 유사 공정 현장
+조치: 포장 공정 레퍼런스로만 보관
 담당 후보: 미지정 (승인 후)</pre>
   </div>
-  <div class="card">
-<pre>신호: 라면 위생요건·수산물 전자증명
-발동 조건: 세부 가열·원료육 요건 원문 공개
-조치: 수출형 HACCP 사전점검표 초안 검토
-담당 후보: 미지정 (승인 후)</pre>
-  </div>
-  <p class="muted">발동 전에는 작업을 만들지 않습니다. 매일 오전 8시 예약은 승인 전이라 만들지 않았습니다.</p>
+  <p class="muted">발동 전에는 작업을 만들지 않습니다. 매일 오후 1시 예약은 이번 승인으로 등록합니다.</p>
 
   <h2>9. 출처 및 검증 상태</h2>
-  <table>
-    <tr><th>항목</th><th>출처</th><th>검증</th></tr>
-    <tr><td>한·중 협력 3건</td><td>보충 조사 · 식약처 원문</td><td>확정</td></tr>
-    <tr><td>위생증명 질의응답</td><td>식품저널 메일 · 식약처 원문</td><td>확정 (법령 아님)</td></tr>
-    <tr><td>관찰 4건</td><td>기업·2차 출처</td><td>미확인</td></tr>
-  </table>
-  <p class="muted">주 수집은 Outlook 식품저널 메일입니다. 한·중 건은 메일에 없어 보충 조사로 표시했습니다.</p>
+  <p>주 수집: Outlook 식품저널 메일 2026-08-20 11:40. 이후 신규 메일 0. 기사 링크는 식품저널 원문입니다.</p>
 
   <details class="sys">
     <summary>시스템 운영 정보 · 상세 보기</summary>
-    <details class="sub">
-      <summary>중복 제거 기록</summary>
-<pre>검토 후보 28 · 중복 제외 23 · 변경 1(위생증명 질의응답, 참고) · 순수 신규 1(한·중 협력 3건)
-기존 보고: HACCP 교육 일원화, 성적서 큐알, 학교급식, 팔도 인공지능, CJ Food AI 360,
-당알코올, 인공지능 광고, 클린라벨, 기능성표시, 공유공장, 한·인도 협정, 원가, 자동화 필요성</pre>
-    </details>
-    <details class="sub">
-      <summary>예약 상태</summary>
-<pre>의도 시각: 매일 08:00 서울
-로컬 예약: 식품저널 아침 브리프 해당 없음 — 승인 없이 만들지 않음
-ChatGPT 자동화: 미확인</pre>
-    </details>
-    <details class="sub">
-      <summary>업무 보드 현황</summary>
-<pre>준비: 식품저널 브리프 2026-08-20 검수용
-실행 후보: 2 (발동 조건 대기, 미생성)</pre>
-    </details>
-    <details class="sub">
-      <summary>실행 증거</summary>
-<pre>Outlook 검색·본문 실독: 통과 — 최신 2026-08-20 11:40, 이후 신규 메일 0
-정부 원문: 한·중·위생증명 PDF 확정
-세션: 20260820_191215_ef9385</pre>
-    </details>
-    <details class="sub">
-      <summary>완료 판정</summary>
-<pre>브리핑 정보 상태: 완료
-조사 범위 상태: 부분 완료 (관찰 4건 공식 본문 미완)
-운영 검증 상태: 통과</pre>
-    </details>
+<pre>중복: 풀무원 HACCP, 마른김, CEPA, 위생증명 FAQ는 기보고
+예약: 매일 13:00 서울 (승인됨)
+운영 검증: 메일 실독 통과
+판정: 브리핑 정보 완료 · 조사 부분 완료(스마트팜 기사 연도 불일치)</pre>
   </details>
 </main>
 </body>
