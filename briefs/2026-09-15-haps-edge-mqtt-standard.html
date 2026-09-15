@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AlexLAB × AllgenCare | Haps™ Edge / MQTT 연동 표준화 협의안</title>
+  <meta name="description" content="AlexLAB Haps™ Edge와 올젠케어 MQTT 기반 전력·온도·압력·카운트 센서 연동을 위한 표준화 협의안">
+  <style>
+    :root{--bg:#0b1020;--panel:#121a2f;--panel2:#17213a;--line:#293653;--text:#edf3ff;--muted:#9fb0cf;--accent:#67d8ff;--good:#66e0a3}
+    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Pretendard,"Noto Sans KR",Arial,sans-serif;background:linear-gradient(180deg,#09101f 0%,#0e1630 100%);color:var(--text);line-height:1.68}.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 72px}.hero{padding:44px 0 28px}.eyebrow{color:var(--accent);font-weight:800;letter-spacing:.08em;font-size:.84rem;text-transform:uppercase}h1{font-size:clamp(2rem,4vw,3.6rem);line-height:1.12;margin:.4rem 0 1rem}.subtitle{color:var(--muted);max-width:850px;font-size:1.08rem}.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.badge{border:1px solid var(--line);background:#101a31;border-radius:999px;padding:7px 11px;color:#cfe1ff;font-size:.9rem}section{background:rgba(18,26,47,.9);border:1px solid var(--line);border-radius:18px;padding:26px;margin-top:18px;box-shadow:0 10px 36px rgba(0,0,0,.18)}h2{margin:0 0 16px;font-size:1.45rem}h3{margin:22px 0 8px;font-size:1.05rem;color:#dcebff}p{margin:8px 0 12px}ul,ol{padding-left:1.35rem}li{margin:.3rem 0}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border-bottom:1px solid var(--line);padding:11px 10px;text-align:left;vertical-align:top}th{color:var(--accent);font-size:.92rem}code,pre{font-family:"SFMono-Regular",Consolas,Menlo,monospace}pre{white-space:pre-wrap;overflow:auto;background:#09101d;border:1px solid #243451;border-radius:12px;padding:16px;color:#d7e8ff}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:16px}.card strong{color:var(--accent)}.flow{font-size:.98rem}.callout{border-left:4px solid var(--accent);padding:12px 14px;background:#0d1930;border-radius:10px}.ok{color:var(--good)}footer{color:var(--muted);font-size:.9rem;margin-top:28px;text-align:center}@media(max-width:760px){.grid{grid-template-columns:1fr}section{padding:20px}th,td{font-size:.9rem}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">AlexLAB × AllgenCare</div>
+    <h1>Haps™ Edge / MQTT 연동 표준화 협의안</h1>
+    <p class="subtitle">올젠케어 전력관제·온도·압력·카운트 센서의 MQTT 데이터를 AlexLAB Haps™ Manufacturing Intelligence와 안정적으로 연결하기 위한 통신·데이터·보안·Edge 표준 초안입니다.</p>
+    <div class="badges"><span class="badge">MQTT</span><span class="badge">Haps™ Edge</span><span class="badge">Canonical Data Model</span><span class="badge">Event / Time-Series</span><span class="badge">Manufacturing Intelligence</span></div>
+  </header>
+
+  <section><h2>1. 목적</h2><p>현재 올젠케어의 전력관제, 온도, 압력, 카운트 센서 등이 MQTT 통신을 지원하고 있으므로 이를 Haps™와 연동하기 위한 공통 MQTT 계약과 Edge 표준을 정의합니다.</p><pre class="flow">AllgenCare MQTT
+→ Haps Edge Adapter
+→ Haps Canonical Data Model
+→ Event / Time-Series
+→ ThemisAX / AegisAX / Haps Context
+→ Haps™ AI 분석·경보·업무조치</pre></section>
+
+  <section><h2>2. 우선 요청 자료</h2><div class="grid"><div class="card"><strong>MQTT 기본</strong><br>MQTT 3.1.1 / 5.0, Broker 종류, Host/Port, 1883/8883, TLS</div><div class="card"><strong>인증</strong><br>ID/PW, API Key, Client Certificate, mTLS, Client ID 규칙</div><div class="card"><strong>전송정책</strong><br>QoS, Retain, LWT, Reconnect, Publish Interval</div><div class="card"><strong>장치정보</strong><br>Device ID, Serial, Firmware, Timestamp, Sequence, Quality, Local Buffer</div></div><h3>실제 MQTT 샘플 요청</h3><ul><li>전력관제</li><li>온도센서</li><li>압력센서</li><li>카운트센서</li></ul><p>각 장비별 <b>Topic + Payload + QoS + Publish Interval</b> 실제 메시지 5~10건을 요청합니다.</p><pre>Topic:
+factory01/power/meter01
+
+Payload:
+{
+  "voltage": 220.8,
+  "current": 12.4,
+  "power": 2.73,
+  "timestamp": "2026-09-15T14:22:31+09:00"
+}</pre></section>
+
+  <section><h2>3. Gateway Hardware 정보</h2><table><thead><tr><th>구분</th><th>확인 항목</th></tr></thead><tbody><tr><td>Compute</td><td>CPU, RAM, Storage, OS</td></tr><tr><td>Network</td><td>Ethernet Port, Dual LAN, USB</td></tr><tr><td>Industrial I/O</td><td>RS232, RS485, Modbus RTU/TCP, OPC-UA</td></tr><tr><td>MQTT</td><td>Client/Broker 지원 여부</td></tr><tr><td>Industrial</td><td>12/24V DC, DIN Rail, Fanless, Watchdog</td></tr><tr><td>Security</td><td>TPM 2.0, Secure Boot, Encrypted Storage 가능 여부</td></tr></tbody></table></section>
+
+  <section><h2>4. AlexLAB MQTT Topic 표준안</h2><pre>alexlab/{tenant}/{plant}/{line}/{asset}/{device}/{metric}</pre><pre>alexlab/vina01/plant01/line01/compressor01/sensor01/pressure
+alexlab/vina01/plant01/line01/oven01/temp01/temperature
+alexlab/vina01/plant01/line01/smt01/power01/active_power
+alexlab/vina01/plant01/line01/machine01/count01/production_count</pre></section>
+
+  <section><h2>5. Haps Canonical Payload</h2><pre>{
+  "schema_version": "1.0",
+  "tenant_id": "vina01",
+  "plant_id": "plant01",
+  "line_id": "line01",
+  "asset_id": "compressor01",
+  "device_id": "sensor01",
+  "metric": "pressure",
+  "value": 6.82,
+  "unit": "bar",
+  "quality": "GOOD",
+  "timestamp": "2026-09-15T05:30:21.315Z",
+  "sequence": 128394
+}</pre><div class="callout">기존 올젠케어 MQTT Payload를 무리하게 변경하지 않고, <b>Haps Edge Adapter에서 Canonical Format으로 변환</b>하는 것을 기본 원칙으로 합니다.</div></section>
+
+  <section><h2>6. 전력관제 Payload 예시</h2><pre>{
+  "schema_version": "1.0",
+  "device_id": "power-meter-001",
+  "timestamp": "2026-09-15T05:30:21.315Z",
+  "quality": "GOOD",
+  "metrics": {
+    "voltage": { "value": 220.8, "unit": "V" },
+    "current": { "value": 12.4, "unit": "A" },
+    "active_power": { "value": 2.73, "unit": "kW" },
+    "energy": { "value": 24591.7, "unit": "kWh" }
+  }
+}</pre></section>
+
+  <section><h2>7. Metric / Unit 표준</h2><table><thead><tr><th>Metric</th><th>Canonical Unit</th></tr></thead><tbody><tr><td>temperature</td><td>°C</td></tr><tr><td>humidity</td><td>%RH</td></tr><tr><td>pressure</td><td>bar 또는 kPa</td></tr><tr><td>voltage</td><td>V</td></tr><tr><td>current</td><td>A</td></tr><tr><td>active_power</td><td>kW</td></tr><tr><td>energy</td><td>kWh</td></tr><tr><td>production_count</td><td>ea</td></tr><tr><td>vibration</td><td>mm/s 또는 g</td></tr><tr><td>flow_rate</td><td>L/min</td></tr></tbody></table></section>
+
+  <section><h2>8. Timestamp / Quality 표준</h2><p><b>Timestamp:</b> UTC / ISO-8601 / millisecond precision</p><pre>{
+  "device_timestamp": "...",
+  "gateway_timestamp": "...",
+  "ingested_at": "..."
+}</pre><p><b>Quality:</b></p><pre>GOOD
+UNCERTAIN
+BAD
+STALE
+OFFLINE
+CALIBRATION_REQUIRED</pre></section>
+
+  <section><h2>9. QoS / Retain / LWT</h2><ul><li><b>Telemetry:</b> QoS 1 권장</li><li><b>Retain 권장:</b> Device Status, Current Configuration, Latest State</li><li><b>Retain 비권장:</b> 고주기 Telemetry, Event History</li><li><b>LWT:</b> Gateway/Device ONLINE/OFFLINE 상태 관리</li></ul><pre>Topic:
+alexlab/vina01/plant01/device/gateway01/status
+
+ONLINE:
+{ "status": "ONLINE" }
+
+OFFLINE:
+{ "status": "OFFLINE" }</pre></section>
+
+  <section><h2>10. Device ID / Registry</h2><pre>ALG-PWR-000001
+ALG-TMP-000034
+ALG-PRS-000011
+ALG-CNT-000091</pre><p>Haps Device Registry 관리 항목:</p><ul><li>Device ID / Manufacturer / Model / Serial</li><li>Firmware / Sensor Type</li><li>Plant / Line / Asset</li><li>Install Date / Calibration Date / Last Seen</li></ul></section>
+
+  <section><h2>11. 보안 표준</h2><div class="grid"><div class="card"><strong>기본</strong><br>MQTT over TLS / Port 8883</div><div class="card"><strong>확장</strong><br>Device Certificate / mTLS</div><div class="card"><strong>Device Trust</strong><br>TPM 기반 Identity / Secure Boot</div><div class="card"><strong>Local Data</strong><br>Encrypted Storage / Secure Credential</div></div></section>
+
+  <section><h2>12. 권장 연동 구조</h2><pre class="flow">[Sensor]
+   ↓
+AllgenCare Controller / Gateway
+   ↓
+MQTT
+   ↓
+[Haps Edge Adapter]
+   ↓
+Canonical Telemetry
+   ↓
+Event Bus
+   ├→ Time-Series
+   ├→ ThemisAX
+   ├→ AegisAX
+   └→ Haps Context Engine
+            ↓
+         Haps™ AI</pre></section>
+
+  <section><h2>13. 표준화 단계</h2><h3>1단계 — PoC</h3><ul><li>기존 올젠케어 MQTT 규격 유지</li><li>Haps Edge Adapter에서 변환</li><li>전력/온도/압력/카운트 중 실제 장치 1종 연결</li><li>Read-only</li><li>Event / Time-Series 저장</li><li>Haps 조회·이상알림 검증</li></ul><h3>2단계 — 제품화</h3><ul><li>MQTT Topic / Payload 표준</li><li>Device Registry / Metric Dictionary / Unit Dictionary</li><li>Quality Code / TLS / Device Identity</li><li>Store & Forward</li></ul><h3>3단계 — 산업 표준 확장</h3><ul><li>MQTT 5.0</li><li>Sparkplug B 호환</li><li>OPC-UA Connector</li><li>MES / SCADA 연계</li><li>ISA-95 / IEC 62264 기반 Asset 구조 검토</li></ul></section>
+
+  <section><h2>14. 이번 협의에서 우선 결정할 10개 항목</h2><ol><li>현재 MQTT 버전</li><li>실제 Topic / Payload</li><li>QoS</li><li>Publish Interval</li><li>Device ID 규칙</li><li>Local Buffer 지원 여부</li><li>TLS 지원 여부</li><li>Gateway Hardware 사양</li><li>Haps Edge Node로 확장 가능한지 여부</li><li>PoC 대상 장치 1종 선정</li></ol></section>
+
+  <section><h2>15. 최종 목표</h2><pre class="flow">실제 센서 데이터
+→ 제조 Context
+→ 이상 Event
+→ SOP / 내부 지침 검색
+→ ThemisAX 위험 판단
+→ Haps™ AI 원인 분석·조치 권고
+→ Supervisor 승인
+→ Incident 생성</pre><p class="ok"><b>목표:</b> 단순 IoT 모니터링을 넘어 Manufacturing Intelligence로 연결</p></section>
+
+  <footer>AlexLAB × AllgenCare · Haps™ Edge / MQTT Standardization Draft · 2026-09-15</footer>
+</div>
+</body>
+</html>
