@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noindex, noarchive">
+  <meta name="description" content="한국어·영어·베트남어 UI, Chat, RAG, 번역 승인과 제조 데모의 현재 Gap 및 구현 계획. 2026-09-16 코드 감사 공개본.">
+  <link rel="canonical" href="https://alex0916-agent.github.io/briefing-notes/briefs/ART-20260916-001-haps-multilingual-audit/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Alex Readable Docs">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:url" content="https://alex0916-agent.github.io/briefing-notes/briefs/ART-20260916-001-haps-multilingual-audit/">
+  <meta property="og:title" content="Haps™ 다국어 Foundation 감사 보고서">
+  <meta property="og:description" content="한국어·영어·베트남어 UI, Chat, RAG, 번역 승인과 제조 데모의 현재 Gap 및 구현 계획. 2026-09-16 코드 감사 공개본.">
+
+
+
+  <meta property="article:published_time" content="2026-09-16">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Haps™ 다국어 Foundation 감사 보고서">
+  <meta name="twitter:description" content="한국어·영어·베트남어 UI, Chat, RAG, 번역 승인과 제조 데모의 현재 Gap 및 구현 계획. 2026-09-16 코드 감사 공개본.">
+
+  <title>Haps™ 다국어 Foundation 감사 보고서</title>
+  <link rel="stylesheet" href="styles.css?v=1.1.0-ml1">
+</head>
+<body>
+<a class="skip-link" href="#summary">본문으로 건너뛰기</a>
+  <div id="progress" aria-hidden="true"></div>
+  <header>
+    <div class="layout">
+      <div class="eyebrow">Alex LAB · Multilingual Foundation</div>
+      <h1>Haps™ 다국어 Foundation 감사 보고서</h1>
+      <p class="dek">한국어·영어·베트남어를 하나의 근거·판정 코어로 연결하기 위한 코드 감사와 구현 계획.</p>
+      <div class="meta">
+        <span>문서 작성 2026-09-16</span>
+        <span>AlexLAB / Codex 코드 감사</span>
+        <a href="https://github.com/alex0916-agent/briefing-notes/blob/main/briefs/ART-20260916-001-haps-multilingual-audit/index.html" target="_blank" rel="noopener noreferrer">공개본 소스 보기 ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout page-grid">
+    <nav aria-label="목차">
+      <details id="toc-panel" open><summary>목차</summary>
+      <ol><li><a href="#summary">한눈에 결론</a></li><li><a href="#scope">감사 범위와 증거 수준</a></li><li><a href="#matrix">다국어 구현 매트릭스</a></li><li><a href="#probes">코드에서 재현된 문제</a></li><li><a href="#core">목표: 하나의 코어, 여러 언어</a></li><li><a href="#locale">Locale·Chat·시간대 정책</a></li><li><a href="#rag">Multilingual RAG 설계</a></li><li><a href="#translation">원문·번역 수명주기와 Evidence</a></li><li><a href="#operations">용어·Alert·Incident·Report</a></li><li><a href="#security">사내 문서·번역의 보안 경계</a></li><li><a href="#demo">베트남어 제조 데모 검수 기준</a></li><li><a href="#plan">구현 순서·Exit Gate</a></li><li><a href="#evidence">출처·산출물·공개 범위</a></li><li><a href="#copy">복사용 최종 보고</a></li></ol></details>
+    </nav>
+
+    <main>
+      <div class="controls" aria-label="문서 제어">
+        <button type="button" id="expand-all">모두 펼치기</button>
+        <button type="button" id="collapse-all">모두 접기</button>
+        <button type="button" onclick="window.print()">인쇄·PDF 저장</button>
+      </div>
+      <details class="article-section" id="summary" open>
+<summary><h2>한눈에 결론</h2></summary>
+<div class="section-body">
+<div class="callout tip"><p class="callout-title">구현 준비: CONDITIONAL_READY · 실제 베트남어 제조 데모: NOT_READY</p>
+<p>Haps™에는 다국어 검색과 원문 인용에 재사용할 기반이 있습니다. 그러나 언어 설정부터 사내 SOP 검색·현장 판정·응답까지 이어지는 다국어 운영 경로는 아직 완성되지 않았습니다.</p></div>
+<ul><li><strong>UI 번역만의 문제가 아닙니다.</strong> 사용자 언어 계약, 대화 맥락, 검색 토큰화, 번역 승인과 실제 제조 Context를 함께 연결해야 합니다.</li><li><strong>기존 코어는 재사용합니다.</strong> BGE-M3 dense 검색 코드, 원문 hash·인용, 구조화 Themis 평가, 대화 저장과 보고서 변수 모델이 기반입니다.</li><li><strong>언어 편향을 실제로 재현했습니다.</strong> 영어·베트남어 후속 질문의 검색 맥락 누락과 베트남어 성조가 있는 단어의 분절 문제가 확인됐습니다.</li><li><strong>같은 사실은 같은 판정이어야 합니다.</strong> 원문·Context·Rule·Decision은 하나로 유지하고 대화·UI·알림·보고서의 표현만 바꿉니다.</li></ul>
+<p><strong>결정 필요:</strong> P0 활성 화면 범위, 베트남어 제조 용어 검수자, 고객 문서 외부 전송 조건, 평가용 문서·질문 세트를 확정해야 합니다.</p>
+<p><strong>영향:</strong> 모델의 다국어 능력만으로 실제 제조 데모 준비 완료를 주장할 수 없습니다. 일정·예산·응답속도는 아직 확정하지 않았습니다.</p>
+<p><strong>다음 행동:</strong> 공통 계약·합성 검수 세트를 먼저 확정하고, 사용자 Locale → UI → Chat 응답까지 한 흐름으로 연결하는 P0 작업부터 진행하는 것을 권고합니다.</p>
+<p class="scope-note">이번 결과는 감사·설계·구현 계획입니다. 기능 구현, DB 변경, 새 AI Provider 도입 또는 제품 배포를 수행한 보고서가 아닙니다.</p></div>
+</details>
+<details class="article-section" id="scope" open>
+<summary><h2>감사 범위와 증거 수준</h2></summary>
+<div class="section-body">
+<p>기준일은 <strong>2026-09-16</strong>입니다. 정식 제품의 당시 작업 트리에서 Frontend·Backend·API 계약·SQL·검색·보고서 코드를 조사했습니다. 문서, 화면, 타입 정의 또는 Mock만으로 구현 완료를 판정하지 않았습니다.</p>
+<div class="table-wrap" role="region" aria-label="증거 · 수행 내용 · 판단 한계" tabindex="0"><table><thead><tr><th scope="col">증거</th><th scope="col">수행 내용</th><th scope="col">판단 한계</th></tr></thead><tbody><tr><td>정적 코드 조사</td><td>UI·인증·Chat·RAG·Evidence·Decision·보고서의 실제 계약과 호출 경로</td><td>코드 존재가 운영 배포·성능 통과를 의미하지 않음</td></tr><tr><td>문자열 census</td><td>84개 TS/TSX 파일의 AST 기반 발생 위치 집계</td><td>고유 번역 key 수·번역 견적이 아님</td></tr><tr><td>읽기 전용 합성 probe</td><td>기존 순수 함수에 ko/en/vi 예시와 동일 구조화 입력 대입</td><td>실모델·실센서·실공장 E2E 시험이 아님</td></tr><tr><td>공식 자료 조사</td><td>BGE-M3, Unicode, ECMA-402, i18next, RLS 1차 자료</td><td>일반 모델·표준 특성을 Haps 실측 성능으로 대체하지 않음</td></tr><tr><td>산출물 검증</td><td>내부 감사·설계·계획 8문서와 증거 파일 보존; 게시 전 8문서 hash 재대조</td><td>공개본에는 내부 경로·운영 식별자·원문 데이터를 싣지 않음</td></tr></tbody></table></div>
+<p>운영 DB 적용 상태, 실제 모델 가동, 언어쌍별 Retrieval 정확도·응답속도, 제조기업 SOP 권한의 실환경 효과는 이번 감사에서 <strong>미측정 또는 미검증</strong>입니다. 이전 성능 로그를 이번 다국어 개선 수치로 사용하지 않았습니다.</p>
+<p><strong>상태 의미:</strong> PARTIAL은 재사용 기반과 누락이 함께 있다는 뜻입니다. HARDCODED는 언어·문구·분기가 코드에 고정된 상태, UI_ONLY는 표시만 있는 상태, NOT_IMPLEMENTED는 조사 범위에서 기능 경로를 찾지 못한 상태입니다. READY는 요구한 종단 경로의 검증 완료를 뜻합니다.</p></div>
+</details>
+<details class="article-section" id="matrix" open>
+<summary><h2>다국어 구현 매트릭스</h2></summary>
+<div class="section-body">
+<p>Current는 확인된 현재 상태, Target은 <strong>미적용 설계</strong>입니다. P0는 기반 구현·첫 검수에 필요하고 P1은 운영 확장, P2는 기업별 고도화입니다.</p>
+<div class="table-wrap" role="region" aria-label="Capability · Current · Gap · Target · Priority" tabindex="0"><table><thead><tr><th scope="col">Capability</th><th scope="col">Current</th><th scope="col">Gap</th><th scope="col">Target</th><th scope="col">Priority</th></tr></thead><tbody><tr><td>UI i18n</td><td>HARDCODED / UI_ONLY</td><td>공통 library·resource·resolver 없음</td><td>ko-KR / en-US / vi-VN, 오류·접근성 문구 포함</td><td>P0</td></tr><tr><td>User Locale</td><td>NOT_IMPLEMENTED</td><td>Profile → API → Session 언어 전달 없음</td><td>설정 저장·검증·즉시 적용</td><td>P0</td></tr><tr><td>Plant / Tenant Locale</td><td>NOT_IMPLEMENTED</td><td>실효 상속 resolver 없음</td><td>권한 있는 사업장·테넌트의 기본값 상속</td><td>P0 계약 / P1 관리</td></tr><tr><td>Haps Chat Language</td><td>PARTIAL / HARDCODED</td><td>한국어 prompt·후처리·후속 문맥 규칙</td><td>단일 정책 prompt + response_language</td><td>P0</td></tr><tr><td>Multilingual RAG</td><td>PARTIAL</td><td>Dense 기반은 있으나 언어별 품질·OCR 미검증</td><td>원문 검색 + Unicode-aware lexical</td><td>P0</td></tr><tr><td>Cross-language Retrieval</td><td>PARTIAL 코드 / 사내 문서 NOT_READY</td><td>베트남어 분절·Private 권한 경로·평가 누락</td><td>4방향 검색 평가 + 같은 ACL</td><td>P0</td></tr><tr><td>Evidence</td><td>PARTIAL</td><td>원문 locator·hash는 있으나 언어·번역 view 없음</td><td>원문 기본, 번역 상태·원문 연결 표시</td><td>P0 원문 / P1 번역 UX</td></tr><tr><td>Document Language</td><td>NOT_IMPLEMENTED</td><td>문서·원문·번역 언어 계약 없음</td><td>원문 revision에 언어 metadata</td><td>P0</td></tr><tr><td>Translation Lifecycle</td><td>NOT_IMPLEMENTED</td><td>승인·폐기·원문 변경 연계 없음</td><td>승인 번역만 검색, 원문으로 인용 연결</td><td>P0 gate / P1 workflow</td></tr><tr><td>Alert Localization</td><td>NOT_IMPLEMENTED</td><td>실센서 알림과 언어별 template 미연결</td><td>event_code + template_key + parameters</td><td>P0 코드 / P1 서비스</td></tr><tr><td>Incident Localization</td><td>NOT_IMPLEMENTED</td><td>운영 Incident와 다국어 서술 모델 누락</td><td>Canonical 사건 + 별도 번역 서술</td><td>P0 계약 / P1 workflow</td></tr><tr><td>Report Localization</td><td>PARTIAL / HARDCODED</td><td>변수 모델은 있으나 고정 언어 출력</td><td>동일 데이터 → ko/en/vi 산출물</td><td>P1</td></tr><tr><td>Manufacturing Glossary</td><td>NOT_IMPLEMENTED</td><td>승인·버전·고객별 용어 관리 없음</td><td>공통 용어 정본 + 승인된 override</td><td>P1 / P2</td></tr><tr><td>Date / Time / Number</td><td>PARTIAL</td><td>ko-KR·브라우저 기본값 혼재</td><td>UTC 저장, Locale·Time zone 별도 표시</td><td>P0 공통 / P1 전역</td></tr><tr><td>Locale Audit Trace</td><td>PARTIAL</td><td>단계 코드 저장, 언어·정책 버전 누락</td><td>입력/응답 언어 + Decision/Evidence ID</td><td>P0</td></tr></tbody></table></div></div>
+</details>
+<details class="article-section" id="probes" open>
+<summary><h2>코드에서 재현된 문제</h2></summary>
+<div class="section-body">
+<h3>문자열 inventory</h3>
+<div class="table-wrap" role="region" aria-label="측정 범위 · 발생 위치 수 · 해석" tabindex="0"><table><thead><tr><th scope="col">측정 범위</th><th scope="col">발생 위치 수</th><th scope="col">해석</th></tr></thead><tbody><tr><td>TS/TSX 소스</td><td>84개 파일</td><td>테스트·선언 파일 제외, Demo 소스 포함</td></tr><tr><td>한국어 포함 literal / JSX</td><td>3,494</td><td>고유 번역 문장 수가 아닌 발생 위치 후보</td></tr><tr><td>직접 UI 한국어</td><td>1,465</td><td>JSX text 및 title·aria-label·placeholder·alt 중심</td></tr><tr><td>ASCII 영문 후보 / 직접 UI 영문</td><td>7,681 / 102</td><td>전체 후보에는 ID·class·경로도 포함</td></tr></tbody></table></div>
+<p>이 수치를 번역량·비용·진척률로 바로 환산하면 안 됩니다. 실제 사용자 표시 문자열을 추려 중복 key와 용어를 정리해야 합니다.</p>
+<h3>합성 입력에 대한 실제 함수 결과</h3>
+<div class="table-wrap" role="region" aria-label="Probe · 관측 결과 · 의미" tabindex="0"><table><thead><tr><th scope="col">Probe</th><th scope="col">관측 결과</th><th scope="col">의미</th></tr></thead><tbody><tr><td>“그럼 어떻게 해야 하나요?”</td><td>검색 맥락 사용 true</td><td>한국어 후속 연결 경로 존재</td></tr><tr><td><span lang="en">“What should I do about that?”</span> / <span lang="vi">“Vậy tôi nên làm gì?”</span></td><td>검색 맥락 사용 false</td><td>대화 저장과 별개로 후속 검색 연결 누락</td></tr><tr><td>ko/en/vi의 ‘Line 1 현재 문제’ 예시</td><td>세 문장 모두 intent 미분류</td><td>한국어 기준도 완전하지 않음; 번역 키워드 추가만으로 해결 불가</td></tr><tr><td>한국어 양성 대조 ‘현재 상태를 확인해 주세요’</td><td>sensor_event 분류</td><td>운영 질의 라우팅이 전혀 없는 것은 아님</td></tr><tr><td><span lang="vi">nhiệt độ vượt ngưỡng</span></td><td>nhi / t / v / ng 등으로 분절</td><td>성조가 있는 문자가 유실되는 sparse 토큰화</td></tr><tr><td>동일한 지하수 위험 내용의 ko/en/vi 입력</td><td>한국어만 위험 topic 검출</td><td>자연어 preflight의 언어 편향</td></tr><tr><td>동일 typed 입력 + 동일 시각, 3회</td><td>동일 RED_FLAG / water ALERT</td><td>구조화 평가의 일관성 기반 확인; 다국어 자연어 E2E 성공은 아님</td></tr></tbody></table></div>
+<p>JSON/대화 저장 경로는 Unicode 문자열을 보존합니다. 따라서 “다국어 대화 저장 불가”가 아니라 <strong>저장은 가능하지만 언어별 의미 연결과 응답 정책이 미완료</strong>인 상태입니다.</p></div>
+</details>
+<details class="article-section" id="core" open>
+<summary><h2>목표: 하나의 코어, 여러 언어</h2></summary>
+<div class="section-body">
+<p><strong>One Intelligence Core · One Canonical Data Model · Multiple Languages</strong></p>
+<div class="flow" aria-label="제안된 다국어 처리 흐름"><span>사용자 입력 / 언어</span><b>→</b><span>인증된 Context·Intent</span><b>→</b><span>권한 기반 원문 검색</span><b>→</b><span>하나의 Rule·Decision</span><b>→</b><span>ko / en / vi 표현</span></div>
+<div class="table-wrap" role="region" aria-label="변하지 않는 정본 · Locale에 따라 달라지는 표현" tabindex="0"><table><thead><tr><th scope="col">변하지 않는 정본</th><th scope="col">Locale에 따라 달라지는 표현</th></tr></thead><tbody><tr><td>Tenant·Plant·Line·Asset ID, Context snapshot</td><td>화면 제목·도움말·대화 응답</td></tr><tr><td>원문 Evidence ID·Revision·Hash·Clause·Page</td><td>승인 상태가 표시된 번역 발췌</td></tr><tr><td>Rule·Decision·Event·Incident·Action Code</td><td>알림 제목·설명·권고의 표시 문구</td></tr><tr><td>수치·Unit Code·심각도·승인 상태</td><td>날짜·시간·숫자 표시, 보고서 언어</td></tr></tbody></table></div>
+<p>언어 변경으로 임계값·규정·권한·승인 상태를 바꾸지 않습니다. 자연어 번역 문장을 설비 Action ID로 사용하지 않습니다. 같은 사건의 고정된 Context·사실·근거·Rule 버전을 한 Decision에 연결한 뒤 여러 언어로 표시합니다.</p>
+<p>실시간 데이터가 바뀌거나 다른 공장의 동명 Line을 가리키면 판정이 달라질 수 있습니다. “유사한 문장이면 언제나 같은 판정”이 아니라 <strong>동일한 정본 입력이면 동일 판정</strong>이 검수 기준입니다.</p></div>
+</details>
+<details class="article-section" id="locale" open>
+<summary><h2>Locale·Chat·시간대 정책</h2></summary>
+<div class="section-body">
+<p>P0는 <code>ko-KR</code>, <code>en-US</code>, <code>vi-VN</code>입니다. <code>zh-CN</code>, <code>ja-JP</code>는 P1 후보이며 검수 전에 선택지로 노출하지 않습니다.</p>
+<h3>로그인 후 UI 언어</h3>
+<div class="flow"><span>명시 User 설정</span><b>→</b><span>권한 있는 Plant 기본값</span><b>→</b><span>Tenant 기본값</span><b>→</b><span>System ko-KR</span></div>
+<p>설정이 없는 사용자 값은 상속 상태로 유지합니다. 모든 계정에 한국어를 강제로 저장하면 입력 언어를 따르는 정책이 막힙니다. 브라우저 언어는 미로그인 화면의 보조값으로 사용하고, 로그인 뒤에는 서버 권한과 저장 설정을 기준으로 결정합니다.</p>
+<h3>응답 언어 우선순위</h3>
+<ol><li>현재 질문의 명시 지시: “영어로 답변” 등</li><li>명시적으로 유지한 대화/세션 언어</li><li>명시적으로 저장한 사용자 선호 언어</li><li>현재 질문에서 감지한 언어</li><li>짧거나 모호하면 이전 응답 언어</li><li>최종 UI 언어</li></ol>
+<p>인용 문서 속 “영어로 답하라”는 사용자 지시로 취급하지 않습니다. 실행 중인 요청은 시작 시의 언어 snapshot을 유지합니다.</p>
+<div class="table-wrap" role="region" aria-label="조건 · 응답" tabindex="0"><table><thead><tr><th scope="col">조건</th><th scope="col">응답</th></tr></thead><tbody><tr><td>명시 설정 없음 + 베트남어 질문</td><td>베트남어</td></tr><tr><td>User ko-KR + 베트남어 질문</td><td>한국어</td></tr><tr><td>위 조건 + ‘영어로 답변’</td><td>이번 응답은 영어</td></tr><tr><td>세션 vi-VN + 영어 질문</td><td>베트남어</td></tr><tr><td>‘CCP 1?’처럼 언어가 모호함</td><td>이전 응답 언어, 없으면 UI 언어</td></tr></tbody></table></div>
+<p><strong>Prompt:</strong> 언어별 정책 복제 대신 하나의 canonical prompt와 검증된 response_language를 사용합니다. 결론·근거·실무 조건의 구조 key는 유지하고 제목·본문만 Localize합니다. 정상 답변뿐 아니라 오류·메타 질문·연결 불가·진행 상태에도 같은 정책을 적용합니다.</p>
+<p><strong>날짜·숫자:</strong> Timestamp는 UTC, 날짜만 있는 시행일은 calendar date로 저장합니다. 표시는 Locale와 Time zone을 함께 지정합니다. <code>Asia/Seoul</code>과 <code>Asia/Ho_Chi_Minh</code>는 별도 설정이며 베트남어 선택만으로 시간대·통화·관할 규정을 바꾸지 않습니다. 베트남어 소수점 쉼표도 표시와 숫자 입력 파싱을 구분합니다.</p></div>
+</details>
+<details class="article-section" id="rag" open>
+<summary><h2>Multilingual RAG 설계</h2></summary>
+<div class="section-body">
+<h3>현재 연결과 한계</h3>
+<p>코드에는 <strong>BGE-M3 1,024차원 dense → custom BM25 → 0.6:0.4 가중 RRF → LLM 재순위화 → 원문 인용</strong> 경로가 있습니다. BGE의 learned sparse·ColBERT를 모두 사용하는 구성은 아닙니다. 현재 비율을 다국어 최적값으로 검증하지 않았습니다.</p>
+<p>OCR은 한국어·영어 중심이며 베트남어 스캔 SOP는 별도 검수가 필요합니다. 사내 문서 검색은 사용자 권한 연결이 완성되지 않아 차단된 상태입니다. 다국어 기능을 위해 이 보호를 우회하면 안 됩니다.</p>
+<div class="table-wrap" role="region" aria-label="목표 시나리오 · 코드 기반 · 요구 workflow" tabindex="0"><table><thead><tr><th scope="col">목표 시나리오</th><th scope="col">코드 기반</th><th scope="col">요구 workflow</th></tr></thead><tbody><tr><td>A · vi 질문 → vi SOP</td><td>PARTIAL</td><td>NOT_READY</td></tr><tr><td>B · vi 질문 → en 설비 매뉴얼</td><td>PARTIAL</td><td>NOT_READY</td></tr><tr><td>C · ko 질문 → vi SOP</td><td>PARTIAL</td><td>NOT_READY</td></tr><tr><td>D · en 질문 → ko 기술 문서</td><td>PARTIAL</td><td>공식 문서 PARTIAL / 사내 문서 NOT_READY</td></tr></tbody></table></div>
+<p>위 표는 live 검색 시험의 실패율이 아니라, 코드상 선행 조건과 평가 부재를 반영한 준비도입니다. <a href="https://huggingface.co/BAAI/bge-m3" target="_blank" rel="noopener noreferrer">BGE-M3의 다국어 지원</a> 자체가 Haps의 한국어↔베트남어 제조 SOP 검색 성공을 증명하지는 않습니다.</p>
+<h3>검색 전략 선택</h3>
+<div class="table-wrap" role="region" aria-label="옵션 · 장점 · 위험 · 추가 지연·비용" tabindex="0"><table><thead><tr><th scope="col">옵션</th><th scope="col">장점</th><th scope="col">위험</th><th scope="col">추가 지연·비용</th></tr></thead><tbody><tr><td>A · 원문 질의로 다국어 embedding</td><td>의미·수치 보존, 번역 전송 없음</td><td>언어쌍·용어 편차는 실측 필요</td><td>추가 번역 호출 없음</td></tr><tr><td>B · 영어로 변환 후 검색</td><td>영문 corpus의 보조 표현 확보</td><td>부정·의무·명칭 변화, 다른 언어 문서에는 여전히 교차언어 문제</td><td>매번 번역 단계 발생</td></tr><tr><td>C · 원문 + 번역 multi-query</td><td>원문 경로를 유지하며 누락 보완</td><td>중복·무관 후보·추적 복잡성</td><td>번역·embedding·검색 증가</td></tr></tbody></table></div>
+<p><strong>권고:</strong> A를 기준선으로 삼고, 측정된 부족이 있을 때만 C를 제한된 보완 검색으로 허용합니다. B는 비교 실험군입니다. 새 Provider 자동 우회나 특정 문서명·법정 정답 수치의 강제 매칭은 사용하지 않습니다.</p>
+<p>Unicode 문자·성조·정규화를 보존하고 analyzer 버전을 기록합니다. 원문/번역 후보는 <strong>동일 원문 revision·chunk</strong> 기준으로 중복을 합칩니다. 언어는 검색 힌트이지, 권한이나 문서 범위를 대신하지 않습니다.</p></div>
+</details>
+<details class="article-section" id="translation" open>
+<summary><h2>원문·번역 수명주기와 Evidence</h2></summary>
+<div class="section-body">
+<p><strong>Original Document = Canonical Source. Translation = Derived Artifact.</strong> 번역 생성이나 승인으로 원문을 덮어쓰거나 폐기 문서를 다시 활성화하지 않습니다.</p>
+<div class="flow"><span>AI_TRANSLATED</span><b>→</b><span>REVIEW_REQUIRED</span><b>→</b><span>HUMAN_VERIFIED</span><b>→</b><span>APPROVED_TRANSLATION</span></div>
+<p><code>REJECTED</code>·<code>SUPERSEDED</code>는 현재 판정 검색에서 제외합니다. 인간 검토만 끝난 상태도 최종 승인으로 간주하지 않습니다. 거절·폐기 후 수정은 새 artifact로 보존합니다.</p>
+<div class="table-wrap" role="region" aria-label="Metadata 제안 · 역할" tabindex="0"><table><thead><tr><th scope="col">Metadata 제안</th><th scope="col">역할</th></tr></thead><tbody><tr><td>document_language / original_language</td><td>문서·원문의 언어, 혼합/불명확 상태 보존</td></tr><tr><td>translation_language / translation_status</td><td>번역 대상 언어와 승인 수명</td></tr><tr><td>translation_source / translation_model</td><td>원문 revision·hash와 생성 방법 연결</td></tr><tr><td>human_verified / approved_at</td><td>서버 검토·승인 이력, 승인자와 시각</td></tr><tr><td>answer_language / source_language</td><td>응답 언어와 근거 언어 분리</td></tr><tr><td>document_id / revision / clause / page / original_text_reference</td><td>언어가 바뀌어도 동일 원문을 추적</td></tr><tr><td>translated_excerpt / translation_status</td><td>번역 발췌는 상태가 있는 별도 표현</td></tr></tbody></table></div>
+<p><strong>검색 허용:</strong> 현재 사용자의 원문 권한, 원문의 승인·활성·시행 상태, hash 무결성을 먼저 확인합니다. 번역 후보는 여기에 최종 승인·원문 hash 일치·원문 segment 정합성이 추가로 필요합니다.</p>
+<p><strong>UI 제안:</strong> “원문 보기”를 기본으로 하고 “번역 보기”에 언어·승인 상태를 표시합니다. 미승인 번역은 허용된 경우에만 참고용 표시로 제공하며 판정 근거로 채택하지 않습니다. 원문 권한이 없으면 번역도 제공하지 않습니다.</p>
+<p>원문이 개정·폐기되거나 권한이 회수되면 번역·인덱스·cache에도 반영해야 합니다. 번역의 페이지 번호를 원문 위치로 오인용하거나 새 원문을 과거 인용에 조용히 바꾸지 않습니다.</p></div>
+</details>
+<details class="article-section" id="operations" open>
+<summary><h2>용어·Alert·Incident·Report</h2></summary>
+<div class="section-body">
+<h3>제조 용어 정본</h3>
+<p>term_key·domain·ko/en/vi label·승인·version·고객별 override를 갖춘 사전이 필요합니다. 위험·단위 용어의 작은 검수 집합은 P0, 공통 versioned 사전은 P1, 고객별 override는 P2로 구분합니다.</p>
+<div class="table-wrap" role="region" aria-label="Canonical Term · ko-KR · en-US · vi-VN · 초안" tabindex="0"><table><thead><tr><th scope="col">Canonical Term</th><th scope="col">ko-KR</th><th scope="col">en-US</th><th scope="col">vi-VN · 초안</th></tr></thead><tbody><tr><td>production_line</td><td>생산 라인</td><td>Production line</td><td><span lang="vi">Dây chuyền sản xuất</span></td></tr><tr><td>sensor</td><td>센서</td><td>Sensor</td><td><span lang="vi">Cảm biến</span></td></tr><tr><td>corrective_action</td><td>시정조치</td><td>Corrective action</td><td><span lang="vi">Hành động khắc phục</span></td></tr><tr><td>maintenance</td><td>유지보수</td><td>Maintenance</td><td><span lang="vi">Bảo trì</span></td></tr><tr><td>sop</td><td>표준작업절차</td><td>Standard operating procedure</td><td><span lang="vi">Quy trình thao tác chuẩn</span></td></tr></tbody></table></div>
+<p>내부 설계에는 17개 용어 초안이 있습니다. 위 번역도 <strong>현지 제조 전문가의 승인 전 초안</strong>이며 제품에 배포된 용어가 아닙니다.</p>
+<h3>언어 중립 운영 데이터</h3>
+<p>알림은 완성된 한국어 문장만 저장하지 않고 <code>event_code</code>, <code>template_key</code>, 숫자·자산 등 typed parameters를 보존하는 구조를 제안합니다.</p>
+<pre aria-label="합성 알림 계약 예시">{
+  "event_code": "TEMP_THRESHOLD_HIGH",
+  "template_key": "alert.temp_threshold_high",
+  "parameters": {
+    "asset": "Reflow Oven #3",
+    "value": 258.6,
+    "limit": 250,
+    "unit": "CEL"
+  }
+}</pre>
+<p>위 수치는 <strong>합성 계약 예시</strong>이며 실제 장치 관측이 아닙니다. 언어별 표시가 달라도 사건·심각도·측정값·한계값은 같습니다.</p>
+<div class="table-wrap" role="region" aria-label="영역 · Canonical · Localized" tabindex="0"><table><thead><tr><th scope="col">영역</th><th scope="col">Canonical</th><th scope="col">Localized</th></tr></thead><tbody><tr><td>Incident / CAPA</td><td>incident_type·severity·status·action_code·승인 ID</td><td>원문 제목·설명·권고 + 별도 번역 서술</td></tr><tr><td>Report</td><td>동일 snapshot·facts·Evidence·Decision·canonicalDataHash</td><td>ko/en/vi template·본문·artifactHash</td></tr><tr><td>Tool / Agent</td><td>GET_LINE_STATUS 등 고정 Action Code, 검증된 자산 ID</td><td>언어는 표시 metadata, 실행 권한이 아님</td></tr></tbody></table></div>
+<p>현재 확인된 한국어 완성문 저장은 주로 대화·진행 로그입니다. 실센서 Alert·운영 Incident가 완성되어 한국어로만 동작한다고 과장하지 않습니다. 이들 실제 서비스 연결도 별도 선행 과제입니다.</p></div>
+</details>
+<details class="article-section" id="security" open>
+<summary><h2>사내 문서·번역의 보안 경계</h2></summary>
+<div class="section-body">
+<p>언어가 달라도 원문과 동일한 권한을 <strong>검색 후보 생성 이전</strong>에 적용해야 합니다. 후보 확장·재순위화·원문 보기·번역 cache 반환에도 같은 경계를 유지합니다.</p>
+<div class="table-wrap" role="region" aria-label="경계 · 필요 조건" tabindex="0"><table><thead><tr><th scope="col">경계</th><th scope="col">필요 조건</th></tr></thead><tbody><tr><td>원문과 번역 ACL</td><td>번역은 원문 권한을 상속하거나 더 좁게 제한</td></tr><tr><td>Tenant / Plant / Section</td><td>서버가 인증·소속으로 검증, 질의문이나 클라이언트 ID만 신뢰하지 않음</td></tr><tr><td>번역 cache</td><td>Tenant·권한 버전·원문 revision/hash·언어·모델·용어·정책 버전 분리</td></tr><tr><td>권한·문서 변경</td><td>회수·폐기·개정 이후 cache hit도 재검증</td></tr><tr><td>외부 AI 전송</td><td>생성뿐 아니라 질의 변환·재순위화·번역에도 동일 고객 정책</td></tr><tr><td>감사 로그</td><td>Canonical Code와 Locale·정책 버전 기록, 기밀 전문 복제 최소화</td></tr></tbody></table></div>
+<p>현재 외부 모델 경로에는 질문·대화 맥락·공식 근거 후보 발췌가 전달될 수 있습니다. 이를 사내 SOP 전체 번역에 그대로 확대하면 안 됩니다. UI 문구는 검수된 정적 resource를 우선 사용하고, 기밀 문서는 local-only 요구와 고객 승인부터 확인합니다.</p>
+<p>번역 cache를 통한 실제 Tenant 유출을 이번 감사에서 발견했다는 뜻은 아닙니다. 미구현 기능을 추가할 때 방지해야 할 구조 위험입니다. 고객 문서 전송·새 번역 Provider·로컬 모델 설치는 이번 작업에서 실행하지 않았습니다.</p></div>
+</details>
+<details class="article-section" id="demo" open>
+<summary><h2>베트남어 제조 데모 검수 기준</h2></summary>
+<div class="section-body">
+<p>목표 질문은 <span lang="vi">“Dây chuyền 1 hiện có vấn đề gì?”</span>와 “1번 라인 현재 이상 원인이 뭐야?”입니다. 동일 사건을 가리키도록 먼저 공장·라인·사건·시점이 고정된 Context를 확보해야 합니다.</p>
+<div class="table-wrap" role="region" aria-label="단계 · 현재 준비도 · 필요한 검증" tabindex="0"><table><thead><tr><th scope="col">단계</th><th scope="col">현재 준비도</th><th scope="col">필요한 검증</th></tr></thead><tbody><tr><td>베트남어 인식·응답 언어 결정</td><td>NOT_READY</td><td>Locale 계약과 짧은/혼합 입력 처리</td></tr><tr><td>Line Context 조회</td><td>NOT_READY</td><td>실제 자산·이벤트·권한 기반 resolver</td></tr><tr><td>영어/베트남어 SOP 검색</td><td>NOT_READY</td><td>Private ACL + 원문 gold chunk + 언어쌍 시험</td></tr><tr><td>원문 Evidence 표시</td><td>PARTIAL</td><td>현재 공식 원문 경로를 사내 문서에도 검증</td></tr><tr><td>Canonical Decision</td><td>PARTIAL</td><td>구조화 평가를 실제 Context·Rule에 연결</td></tr><tr><td>베트남어 응답</td><td>NOT_READY</td><td>본문·제목·오류·숫자·성조·용어 검수</td></tr><tr><td>Incident / 업무 Action</td><td>NOT_READY</td><td>실제 운영 서비스와 승인 연결</td></tr></tbody></table></div>
+<h3>10개 Demo Acceptance Criteria</h3>
+<ol>
+<li>한국어 질문 → 한국어 응답</li><li>영어 질문 → 영어 응답</li><li>베트남어 질문 → 베트남어 응답</li>
+<li>동일 사건·snapshot·사실·Rule 버전이면 동일 Decision Code</li>
+<li>베트남어 질문으로 영어 문서의 정답 원문 검색</li><li>원문 Evidence와 revision·위치 표시</li>
+<li>번역문·원문·승인 상태 구분</li><li>사용자 Locale 저장 후 즉시 반영 및 새로고침 유지</li>
+<li>같은 Alert의 언어만 변환, 수치·심각도 불변</li><li>감사 로그에 Canonical Code·Locale·정책 버전 기록</li>
+</ol>
+<p>1~3은 명시적인 사용자/세션 언어 override가 없는 기본 상황입니다. 구현 후 충돌 정책도 별도 시험해야 합니다. 현재 위 10개 전체를 통과한 상태는 아닙니다.</p>
+<p>먼저 <strong>SYNTHETIC_TEST</strong>로 표시한 격리 fixture를 검증하고, 실제 PoC는 승인된 현장 데이터·사내 SOP·Connector로 같은 시험을 다시 수행합니다. 합성 데모를 실제 공장 운영 완료로 보고하지 않습니다.</p></div>
+</details>
+<details class="article-section" id="plan" open>
+<summary><h2>구현 순서·Exit Gate</h2></summary>
+<div class="section-body">
+<div class="table-wrap" role="region" aria-label="Phase · 범위 · 우선순위 · 완료 기준" tabindex="0"><table><thead><tr><th scope="col">Phase</th><th scope="col">범위</th><th scope="col">우선순위</th><th scope="col">완료 기준</th></tr></thead><tbody><tr><td>ML0 · Foundation</td><td>감사·Locale/Decision 계약·gold corpus·권한 부정 시험</td><td>P0</td><td>구현 범위·외부 전송 조건·언어 검수자 확정</td></tr><tr><td>ML1 · UI / Chat</td><td>User Locale, ko/en/vi UI·응답·오류·날짜/시간</td><td>P0</td><td>설정 저장 → API → prompt → 화면의 종단 시험</td></tr><tr><td>ML2 · Multilingual RAG</td><td>Unicode 검색, Private 권한, 언어 metadata·원문 인용·번역 승인 gate</td><td>P0</td><td>4방향 검색·권한 누출 방지·미승인 번역 배제</td></tr><tr><td>ML3 · Operational Localization</td><td>공통 Glossary, Alert·Incident·Report</td><td>P1</td><td>동일 Canonical Data의 3언어 표현 검수</td></tr><tr><td>ML4 · Enterprise</td><td>고객별 용어, Local Translation, Voice</td><td>P2</td><td>기업 격리·전송 제한·자원·라이선스·성능 검수</td></tr></tbody></table></div>
+<h3>가장 먼저 할 5개 Task</h3>
+<ol><li><strong>검수 계약:</strong> 동일 Decision identity, 3언어 질문 세트, 원문 정답 위치와 권한 부정 fixture를 확정합니다.</li>
+<li><strong>UI/Chat 수직 연결:</strong> 사용자 Locale 저장에서 정상·오류 응답까지 한 흐름을 구현합니다.</li>
+<li><strong>검색·Private 경계:</strong> Unicode 토큰화와 사용자 권한 전달을 검증한 뒤 4방향 검색을 평가합니다.</li>
+<li><strong>원문·번역:</strong> 언어 metadata, 승인 수명주기, 원문 revision 연결과 Evidence 구분을 추가합니다.</li>
+<li><strong>실제 제조 시나리오:</strong> Context·Event·Incident 의존성을 연결한 뒤 동일 snapshot의 3언어 데모를 검수합니다.</li></ol>
+<p>Private 권한 Adapter와 제조 Context·실데이터 연결은 단순 UI 번역을 넘어서는 Backend 과제입니다. 언어 작업과 별도 완료 기준으로 추적해야 합니다.</p>
+<h3>성능·회귀·배포 원칙</h3>
+<ul><li>추가 언어 감지용 외부 호출을 기본으로 늘리지 않습니다. 원문 검색을 기준선으로 하고 보완 검색에 시간·비용 예산을 둡니다.</li><li>Warm/cold·cache hit/miss별로 검색·번역·재순위화·생성 p50/p95, 첫 진행 표시·첫 내용·완료 시각을 따로 측정합니다.</li><li>속도 개선을 위해 인용·권한 검증을 생략하거나 정답을 하드코딩하지 않습니다. 이번 감사로 1.5초 완료 또는 SLA를 보장하지 않습니다.</li><li>기존 한국어 요청과 이력의 호환성을 유지하고 additive field·feature flag·index version으로 단계 배포합니다.</li><li>Rollback은 검증된 flag·index version으로 복귀하며 원문·기존 인덱스·과거 봉인을 통째로 지우지 않습니다.</li><li>운영 Migration·제품 배포·신규 AI 과금·고객 데이터 전송은 별도 승인 대상입니다.</li></ul></div>
+</details>
+<details class="article-section" id="evidence" open>
+<summary><h2>출처·산출물·공개 범위</h2></summary>
+<div class="section-body">
+<p>이 페이지는 2026-09-16 내부 코드 감사 결과를 재구성한 <strong>공개용 파생 보고서</strong>입니다. 내부 상세본의 파일·함수별 근거 33개, 문자열 census 및 읽기 전용 probe를 기반으로 합니다. 원본 8문서의 hash 일치를 게시 준비 단계에서 다시 확인했습니다.</p>
+<div class="table-wrap" role="region" aria-label="내부 산출물 · 담당 범위" tabindex="0"><table><thead><tr><th scope="col">내부 산출물</th><th scope="col">담당 범위</th></tr></thead><tbody><tr><td>HAPS_MULTILINGUAL_AUDIT</td><td>감사 범위·코드 증거·문자열 inventory</td></tr><tr><td>HAPS_I18N_IMPLEMENTATION_MATRIX</td><td>현재 상태·Gap·Target·우선순위</td></tr><tr><td>HAPS_LOCALE_POLICY</td><td>UI/응답 언어·시간대·충돌 정책</td></tr><tr><td>HAPS_MULTILINGUAL_RAG_DESIGN</td><td>검색 전략·권한·원문 Evidence·평가</td></tr><tr><td>HAPS_TRANSLATION_LIFECYCLE</td><td>번역 상태·승인·폐기·원문 관계</td></tr><tr><td>HAPS_MANUFACTURING_GLOSSARY_DESIGN</td><td>용어·Canonical Code·운영 표현</td></tr><tr><td>HAPS_VIETNAMESE_DEMO_READINESS</td><td>시나리오·10개 검수 기준</td></tr><tr><td>HAPS_MULTILINGUAL_IMPLEMENTATION_PLAN</td><td>파일/API별 내부 상세 계획·단계·회귀·rollback</td></tr></tbody></table></div>
+<p>내부 원본, 코드 위치, 로컬 절대경로, 고객 문서, 운영 로그, 보안 재현 세부사항은 공개 번들에서 제외했습니다. 이 페이지는 인증 없이 접근할 수 있으며 검색 노출 제한 설정이 비공개를 보장하지 않습니다.</p>
+<h3>공식 1차 자료</h3>
+<ul><li><a href="https://huggingface.co/BAAI/bge-m3" target="_blank" rel="noopener noreferrer">BAAI BGE-M3 모델 카드</a> — 모델 특성 확인. 제품 언어쌍 품질은 별도 검증이 필요합니다.</li><li><a href="https://arxiv.org/html/2402.03216v4" target="_blank" rel="noopener noreferrer">BGE-M3 연구 논문</a> — 모델 평가 범위와 제품 SOP 평가 범위를 구분했습니다.</li><li><a href="https://tc39.es/ecma402/" target="_blank" rel="noopener noreferrer">ECMA-402</a> · <a href="https://www.unicode.org/reports/tr35/" target="_blank" rel="noopener noreferrer">Unicode Locale Data Markup Language</a> — Locale·국제화 표준.</li><li><a href="https://react.i18next.com/latest/i18next-instance" target="_blank" rel="noopener noreferrer">React-i18next 연동</a> · <a href="https://www.i18next.com/overview/configuration-options" target="_blank" rel="noopener noreferrer">i18next 설정</a> — 제안 UI 기반. 이번에는 설치하지 않았습니다.</li><li><a href="https://supabase.com/docs/guides/database/postgres/row-level-security" target="_blank" rel="noopener noreferrer">Supabase RLS</a> — 검색 전 권한 적용 설계의 참고자료.</li></ul>
+<p><a href="../ART-20260915-001-haps-technical-audit/">이전 Haps 기술·제조 확장 감사 보고서</a>는 제조 Context·Edge·On-Prem 등의 선행 Gap을 다룹니다. 이번 다국어 검증을 대신하지 않으며 두 보고서의 기준일을 구분해야 합니다.</p>
+<p><a href="https://github.com/alex0916-agent/briefing-notes/commits/main/briefs/ART-20260916-001-haps-multilingual-audit/">공개본 변경 이력</a> · <a href="https://github.com/alex0916-agent/briefing-notes/blob/main/briefs/ART-20260916-001-haps-multilingual-audit/index.html">공개 HTML 소스</a></p></div>
+</details>
+<details class="article-section" id="copy" open>
+<summary><h2>복사용 최종 보고</h2></summary>
+<div class="section-body"><p>감사 결론과 다음 작업만 정리한 복사본입니다. PARTIAL을 실제 서비스 준비 완료로 해석하지 마십시오.</p><button type="button" id="copy-report">최종 보고 복사</button><p id="copy-status" role="status" aria-live="polite"></p><pre id="copy-report-text">MULTILINGUAL READINESS
+======================
+기준일: 2026-09-16
+범위: AUDIT / DESIGN / IMPLEMENTATION PLAN
+기능 구현·DB 변경·제품 배포: 미실행
+
+UI i18n: NOT_READY
+Haps Chat: PARTIAL
+User Locale: NOT_READY
+Multilingual RAG: PARTIAL
+Cross-language Retrieval: PARTIAL
+Original Evidence: PARTIAL
+Translation Lifecycle: NOT_READY
+Alert Localization: NOT_READY
+Incident Localization: NOT_READY
+Vietnamese Demo: NOT_READY
+
+TOP 5 BLOCKERS
+==============
+1. Locale 저장·API·prompt·UI의 종단 계약 부재
+2. 한국어 중심 분기와 베트남어 sparse 성조 유실
+3. Private RAG 사용자 권한 전달 미구현
+4. 승인 번역·원문 revision·ACL/cache 수명주기 부재
+5. 제조 Context/Event/Incident 및 다국어 E2E 검증 부재
+
+TOP 5 NEXT ACTIONS
+==================
+1. 공통 계약과 3언어 gold·권한 fixture 확정
+2. User Locale + UI/Chat 언어 흐름 구현
+3. Unicode 검색 + Private ACL + 4방향 Retrieval 평가
+4. 원문 언어 metadata·번역 승인·Evidence 구분 구현
+5. 동일 snapshot 기반 운영 표현과 실제 제조 데모 검수
+
+OVERALL
+&#61;&#61;&#61;&#61;&#61;&#61;&#61;
+CONDITIONAL_READY
+
+위 판정은 단계별 구현 준비에 한정됩니다.
+실제 Vietnamese 제조 Demo는 NOT_READY입니다.
+One Intelligence Core / One Canonical Data Model / Multiple Languages
+</pre></div>
+</details>
+    </main>
+  </div>
+
+  <footer>
+    <div class="layout">Alex LAB · Haps™ Multilingual Foundation · 2026-09-16 · 공개용 파생 보고서</div>
+  </footer>
+
+  <script>
+    const sections = [...document.querySelectorAll("details.article-section")];
+    const links = [...document.querySelectorAll("nav a")];
+    const progress = document.querySelector("#progress");
+    const tocPanel = document.querySelector('#toc-panel');
+    const mobileToc = matchMedia('(max-width: 900px)');
+    const syncToc = () => { tocPanel.open = !mobileToc.matches; };
+    mobileToc.addEventListener('change', syncToc);
+    syncToc();
+
+    document.querySelector("#expand-all").addEventListener("click", () => {
+      sections.forEach(section => { section.open = true; });
+    });
+
+    document.querySelector("#collapse-all").addEventListener("click", () => {
+      sections.forEach(section => { section.open = false; });
+    });
+
+    links.forEach(link => {
+      link.addEventListener("click", () => {
+        const section = document.querySelector(link.getAttribute("href"));
+        if (section) section.open = true;
+        if (mobileToc.matches) tocPanel.open = false;
+      });
+    });
+
+    const updateProgress = () => {
+      const root = document.documentElement;
+      const distance = root.scrollHeight - root.clientHeight;
+      const ratio = distance > 0 ? root.scrollTop / distance : 0;
+      progress.style.width = `${Math.min(100, Math.max(0, ratio * 100))}%`;
+    };
+
+    addEventListener("scroll", updateProgress, { passive: true });
+    addEventListener("resize", updateProgress);
+    updateProgress();
+    sections.forEach(section => section.addEventListener('toggle', updateProgress));
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          links.forEach(link => {
+            link.classList.toggle("active", link.hash === `#${entry.target.id}`);
+          });
+        });
+      }, { rootMargin: "-20% 0px -70% 0px" });
+      sections.forEach(section => observer.observe(section));
+    }
+
+    let printState;
+    addEventListener('beforeprint', () => {
+      printState = sections.map(s => s.open);
+      sections.forEach(s => s.open = true);
+    });
+    addEventListener('afterprint', () => {
+      if (printState) sections.forEach((s,i) => s.open = printState[i]);
+    });
+    document.querySelector('#copy-report').addEventListener('click', async () => {
+      const text = document.querySelector('#copy-report-text').textContent;
+      const status = document.querySelector('#copy-status');
+      status.textContent = '복사 중입니다.';
+      try {
+        if (!navigator.clipboard) throw new Error('CLIPBOARD_UNAVAILABLE');
+        await navigator.clipboard.writeText(text);
+        status.textContent = '복사했습니다.';
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(document.querySelector('#copy-report-text'));
+        const selection = window.getSelection();
+        selection.removeAllRanges(); selection.addRange(range);
+        status.textContent = '자동 복사가 제한되었습니다. 선택된 내용을 직접 복사해 주세요.';
+      }
+    });
+  </script>
+</body>
+</html>
