@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex, noarchive">
+<meta name="description" content="센서 수집·인증·영속 저장·중복 제거·시각과 품질·Themis/Aegis·Haps 조회를 연결하는 단계별 구현 설계 및 수용 시험.">
+<link rel="canonical" href="https://alex0916-agent.github.io/briefing-notes/briefs/ART-20260916-002-haps-mqtt-implementation/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Alex Readable Docs">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://alex0916-agent.github.io/briefing-notes/briefs/ART-20260916-002-haps-mqtt-implementation/">
+<meta property="og:title" content="Haps™ × 올젠케어 MQTT 연동 구현 기술문서">
+<meta property="og:description" content="센서 수집·인증·영속 저장·중복 제거·시각과 품질·Themis/Aegis·Haps 조회를 연결하는 단계별 구현 설계 및 수용 시험.">
+<meta property="article:published_time" content="2026-09-16">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Haps™ × 올젠케어 MQTT 연동 구현 기술문서">
+<meta name="twitter:description" content="센서 수집·인증·영속 저장·중복 제거·시각과 품질·Themis/Aegis·Haps 조회를 연결하는 단계별 구현 설계 및 수용 시험.">
+<title>Haps™ × 올젠케어 MQTT 연동 구현 기술문서</title>
+<link rel="stylesheet" href="styles.css?v=1.1.0-mqtt1">
+</head>
+<body>
+<a class="skip-link" href="#summary">본문으로 건너뛰기</a>
+<div id="progress" aria-hidden="true"></div>
+<header><div class="layout">
+<div class="eyebrow">Alex LAB · MQTT Integration Design</div>
+<h1>Haps™ × 올젠케어 MQTT 연동 구현 기술문서</h1>
+<p class="dek">장치의 메시지를 신뢰할 수 있는 제조 현장 근거로 연결하기 위한 구현 계약과 검수 기준.</p>
+<div class="meta"><span>2026-09-16 · 설계 v1.0</span><span>AlexLAB / Codex · 개발 승인 전</span><a href="https://github.com/alex0916-agent/briefing-notes/blob/main/briefs/ART-20260916-002-haps-mqtt-implementation/index.html" target="_blank" rel="noopener noreferrer">공개본 소스 보기 ↗</a></div>
+</div></header>
+<div class="layout page-grid">
+<nav aria-label="목차"><details id="toc-panel" open><summary>목차</summary><ol><li><a href="#summary">한눈에 결론</a></li><li><a href="#baseline">검토 결과와 현재 구현 경계</a></li><li><a href="#architecture">목표 구조와 신뢰 경계</a></li><li><a href="#modules">구현 컴포넌트와 책임</a></li><li><a href="#security">연결·인증·Tenant 격리</a></li><li><a href="#contract">Canonical 데이터 계약</a></li><li><a href="#storage">저장 모델·멱등성·트랜잭션</a></li><li><a href="#delivery">ACK·재시도·장애 복구</a></li><li><a href="#quality">시각·재전송·센서 품질</a></li><li><a href="#status">실시간 상태·Themis·Aegis·Haps 연결</a></li><li><a href="#api">조회 API·Tool 계약·권한</a></li><li><a href="#capacity">처리량·관측성·On-Prem</a></li><li><a href="#plan">단계별 구현 계획·담당·Exit Gate</a></li><li><a href="#acceptance">수용 시험·운영 전환·롤백</a></li><li><a href="#vendor">올젠케어 협의 체크리스트</a></li><li><a href="#sources">근거·공개 범위·문서 이력</a></li><li><a href="#copy">복사용 구현 요약</a></li></ol></details></nav>
+<main>
+<div class="controls" aria-label="문서 제어"><button type="button" id="expand-all">모두 펼치기</button><button type="button" id="collapse-all">모두 접기</button><button type="button" onclick="window.print()">인쇄·PDF 저장</button></div>
+<details class="article-section" id="summary" open>
+<summary><h2>한눈에 결론</h2></summary>
+<div class="section-body">
+<div class="callout tip"><p class="callout-title">구현 설계 v1.0 · 공급사 계약 확인 후 개발 착수</p><p><strong>기존 장치 포맷은 어댑터에서 수용하고, Haps 내부 데이터는 언어·제조사에 독립적인 계약으로 정규화한다.</strong> 운영 투입은 아직 NOT_READY이며 이 문서는 구현 완료 보고가 아니다.</p></div>
+<ul>
+<li><strong>실제 수집 경로가 먼저다.</strong> 코드 감사에서 MQTT 수집기의 운영 연결은 확인되지 않았다. 응답 프롬프트 변경만으로 실시간 관제를 구현할 수 없다.</li>
+<li><strong>저장 책임을 명확히 한다.</strong> 브로커 수신 확인과 DB 저장 완료는 다른 단계다. 중복 제거·영속 저장·재전송을 하나의 계약으로 검증한다.</li>
+<li><strong>신뢰도와 최신성을 분리한다.</strong> 통신 상태, 센서 오류, 측정 시각, 과거 재전송을 각각 기록해야 안전한 판정이 가능하다.</li>
+<li><strong>첫 PoC는 읽기 전용이다.</strong> 제조설비 제어·원격 설정 변경·법적 인증 취소 자동판정은 범위 밖이다.</li>
+</ul>
+<p><strong>결정 필요:</strong> PoC 사업장·장치 1종, 보안 접속 방식, 저장 책임과 펌웨어 기능 상태, 데이터 보존·권한 범위.</p>
+<p><strong>즉시 영향:</strong> 제품 코드·DB·센서 설정은 변경하지 않는다. 개발 일정과 비용은 전체 payload·장치 수·보존기간 확인 후 산정한다.</p>
+<p><strong>다음 행동:</strong> AlexLAB 기술 담당과 올젠케어가 미제공 통신 문서·전체 메시지·현재 펌웨어를 확인하고 G0 계약 게이트를 공동 종료한다. 아래 담당은 제안 역할이며 실제 배정은 미확정이다.</p>
+<p class="scope-note">공개용 기술 설계. 계정·암호·내부 호스트·장치 식별값·비밀 알고리즘 상수·보안 재현 절차는 포함하지 않는다. 이번 승인 범위는 문서 작성·공개이며 실제 개발·장치 연결 승인은 별도다.</p></div>
+</details>
+<details class="article-section" id="baseline" open>
+<summary><h2>검토 결과와 현재 구현 경계</h2></summary>
+<div class="section-body"><div class="table-wrap" tabindex="0" role="region" aria-label="영역 · 확인된 범위 · 구현에 주는 의미 표"><table><thead><tr><th scope="col">영역</th><th scope="col">확인된 범위</th><th scope="col">구현에 주는 의미</th></tr></thead><tbody><tr><td>업체 사양</td><td>측정·상태 메시지, 중복 제거, 시각·재전송 조건이 제공됨</td><td>연동 계약의 출발점. 전체 측정 배열과 브로커·연결 상세는 추가 확인</td></tr><tr><td>펌웨어 복구</td><td>보관·재전송은 제출 문서상 회신 후 구현 예정</td><td>현재 설치 버전의 완료 증거 없이 지원 기능으로 표시하지 않음</td></tr><tr><td>Haps 수집</td><td>코드 감사에서 실제 MQTT collector 미확인</td><td>별도 어댑터·장치 등록·저장 작업 필요</td></tr><tr><td>ThemisAX</td><td>구조화 입력을 평가하는 로컬 기반 존재</td><td>센서→승인 규칙→결정 연결은 신규 검증 대상</td></tr><tr><td>AegisAX</td><td>로컬 무결성 기록 기반 존재</td><td>상류 장치 신원·측정 진실성을 소급 보증하지 않음</td></tr><tr><td>운영 데모</td><td>실장치·브로커·DB 장애 복구 E2E 미실행</td><td>NOT_READY. 문서/샘플을 운영 완료로 간주하지 않음</td></tr></tbody></table></div><p><strong>기존 협의안과의 관계:</strong> <a href="../2026-09-15-haps-edge-mqtt-standard.html">9월 15일 Edge/MQTT 표준화 협의안</a>의 “기존 포맷 → 어댑터 → Canonical Data” 방향을 구체화한다. 전력·압력·카운트 등 모든 장비 지원과 범용 Edge 런타임 탑재를 이번 자료로 입증하지 않는다. 원문 협의안은 수정하지 않는다.</p></div>
+</details>
+<details class="article-section" id="architecture" open>
+<summary><h2>목표 구조와 신뢰 경계</h2></summary>
+<div class="section-body">
+<div class="architecture"><strong>제안 아키텍처 · 아직 배포되지 않음</strong>
+<div class="flow"><span>센서 / 게이트웨이</span><b>→</b><span>보호된 MQTT broker</span><b>→</b><span>구독 어댑터</span><b>→</b><span>Durable Inbox</span><b>→</b><span>Canonical Event</span></div>
+<div class="architecture-grid"><span><strong>장치 Registry</strong><br>인증된 장치 ↔ tenant / plant / asset / channel</span><span><strong>저장 + Event Outbox</strong><br>원문 참조·품질·시각·중복 결과</span><span><strong>Themis / Aegis</strong><br>규칙 평가·근거 봉인·감사 추적</span></div>
+<div class="flow"><span>상태·Incident projection</span><b>→</b><span>권한 제한 조회 API</span><b>→</b><span>Haps 답변·Evidence</span></div></div>
+<p>장치망→브로커, 브로커→수집기, 수집기→저장소, 사용자→조회 API의 신뢰 경계를 각각 검증한다. DB 직접 접속 정보를 브라우저나 장치에 전달하지 않는다.</p>
+<p>최초 배치는 <strong>기존 backend와 분리된 단일 collector worker + 영속 DB</strong>를 권장한다. 독립 Event Bus는 처음부터 의무화하지 않고 transactional outbox로 시작한다. 병렬 소비·외부 연계 요구가 입증되면 확장한다.</p></div>
+</details>
+<details class="article-section" id="modules" open>
+<summary><h2>구현 컴포넌트와 책임</h2></summary>
+<div class="section-body"><div class="table-wrap" tabindex="0" role="region" aria-label="제안 모듈 · 책임 · 입력 → 출력 / 실패 처리 표"><table><thead><tr><th scope="col">제안 모듈</th><th scope="col">책임</th><th scope="col">입력 → 출력 / 실패 처리</th></tr></thead><tbody><tr><td>BrokerProfile / DeviceRegistry</td><td>연결 설정 참조, 장치·권한·설치 이력</td><td>secret_ref만 저장. 미등록·폐기 장치 거절; 임의 tenant 추정 금지</td></tr><tr><td>MQTT Subscriber</td><td>연결·SUBACK·재구독·종료·지속 세션</td><td>수신 frame → inbox. bounded queue와 재접속 backoff+jitter</td></tr><tr><td>Vendor Adapter</td><td>공급사 측정·상태 스키마 해석</td><td>raw → typed envelope. 잘못된 형식은 제한된 quarantine</td></tr><tr><td>Identity / Schema Validator</td><td>인증 주체 binding, 크기·자료형·범위</td><td>모호한 identity는 UNVERIFIED. 규칙 평가에 투입 금지</td></tr><tr><td>Inbox / Idempotency</td><td>수신 내구성·동일/충돌 판별</td><td>transaction + unique 제약. DB 실패를 성공 처리하지 않음</td></tr><tr><td>Normalizer / Projector</td><td>단위·시간·품질, 최신 상태·이력 분리</td><td>event-time 순서로 current 갱신. 과거 값으로 역행 금지</td></tr><tr><td>Rule Bridge / Event Outbox</td><td>승인 rule version 평가 및 후속 전달</td><td>event_id 기반 멱등 소비. 작업 재시도·dead letter 추적</td></tr><tr><td>Telemetry Read Tool / API</td><td>권한 있는 현장 snapshot 반환</td><td>권한·범위·시각·핸들 포함. 모델에 임의 SQL/광역 검색 권한 없음</td></tr></tbody></table></div><p>위 명칭은 구현 책임을 나눈 설계 이름이다. 기존 파일·클래스·테이블이 이미 존재한다는 뜻이 아니다. 정확한 코드 배치는 개발 승인 후 기존 모듈 경계를 확인해 확정한다.</p></div>
+</details>
+<details class="article-section" id="security" open>
+<summary><h2>연결·인증·Tenant 격리</h2></summary>
+<div class="section-body">
+<ul>
+<li><strong>전송 보호:</strong> TLS와 서버 인증서·hostname 검증을 기본으로 한다. 장치가 지원하지 않으면 승인된 현장 보안 게이트웨이/터널과 네트워크 경계를 검토한다. 포트 번호만으로 보안을 판정하지 않는다.</li>
+<li><strong>권한 분리:</strong> 장치는 허용 토픽 발행, collector는 허용 토픽 구독만 가능하게 한다. 장치 clientId와 collector clientId는 분리한다.</li>
+<li><strong>장치 신원:</strong> 사용자명·인증서·토픽 ACL과 registry가 연결되어야 한다. payload의 MAC/tenant 값만 신뢰하지 않는다.</li>
+<li><strong>공통 토픽 주의:</strong> 표준 MQTT 구독 메시지만으로 원 발행자의 인증 계정을 알 수 있다고 가정하지 않는다. 장치별 ACL 토픽, broker가 검증한 identity 전달 또는 서명된 envelope 중 합의된 경로가 필요하다.</li>
+<li><strong>보관 보호:</strong> raw payload·인증정보 접근을 분리하고 secret manager/OS 보호 저장소·키 회전·백업 접근권한을 검증한다. 로그에는 비밀값을 남기지 않는다.</li>
+<li><strong>조회 격리:</strong> session 기반 tenant/plant/role 검증을 조회 전에 적용한다. 서비스 계정이 RLS를 우회할 수 있으면 repository 계층에서도 범위를 강제하고 교차 tenant 시험을 수행한다.</li>
+</ul>
+<div class="callout"><p>서버 수신 후 해시/HMAC는 수신 이후 변경 검증에 쓰인다. 센서 자체의 오류, 상류 사칭 또는 인증되지 않은 발신을 해결하는 기능은 아니다.</p></div>
+<p>업체 제공 인증 검증값은 독립된 보안 경계로 검증한다. 본 공개본에는 비공개 계산식·상수·공격 재현 입력을 싣지 않는다. TLS·인증·ACL의 역할 구분은 <a href="https://mosquitto.org/man/mosquitto-conf-5.html">Mosquitto 공식 설정 문서</a>를 참고하되 실제 업체 broker 제품·설정을 가정하지 않는다.</p></div>
+</details>
+<details class="article-section" id="contract" open>
+<summary><h2>Canonical 데이터 계약</h2></summary>
+<div class="section-body">
+<p><strong>신규 제안 계약이며 실제 공급사 payload가 아니다.</strong> 원문은 보존하고 어댑터가 변환한다. 아래 ID·시각·수치는 모두 합성 예시다.</p>
+<pre><code>{
+  &quot;schema_version&quot;: &quot;haps.telemetry.v1&quot;,
+  &quot;event_id&quot;: &quot;evt-demo-001&quot;,
+  &quot;registry_version&quot;: &quot;demo-v1&quot;,
+  &quot;tenant_id&quot;: &quot;tenant-demo&quot;,
+  &quot;plant_id&quot;: &quot;plant-demo&quot;,
+  &quot;line_id&quot;: &quot;line-demo&quot;,
+  &quot;asset_id&quot;: &quot;asset-demo&quot;,
+  &quot;device_id&quot;: &quot;device-demo&quot;,
+  &quot;channel_id&quot;: &quot;temperature-1&quot;,
+  &quot;metric&quot;: &quot;temperature&quot;,
+  &quot;value&quot;: 4.2,
+  &quot;unit&quot;: &quot;Cel&quot;,
+  &quot;quality&quot;: &quot;GOOD&quot;,
+  &quot;quality_reasons&quot;: [],
+  &quot;occurred_at&quot;: &quot;2026-09-16T00:00:00Z&quot;,
+  &quot;received_at&quot;: &quot;2026-09-16T00:00:02Z&quot;,
+  &quot;time_valid&quot;: true,
+  &quot;source_message_id&quot;: null,
+  &quot;boot_id&quot;: null,
+  &quot;sequence&quot;: null,
+  &quot;replay&quot;: &quot;UNKNOWN&quot;,
+  &quot;identity_assurance&quot;: &quot;VERIFIED&quot;,
+  &quot;raw_ref&quot;: &quot;raw-demo-001&quot;,
+  &quot;payload_sha256&quot;: &quot;&lt;server-computed&gt;&quot;,
+  &quot;adapter_version&quot;: &quot;vendor.v1&quot;
+}</code></pre>
+<div class="table-wrap" tabindex="0" role="region" aria-label="필드군 · 강제할 계약 표"><table><thead><tr><th scope="col">필드군</th><th scope="col">강제할 계약</th></tr></thead><tbody><tr><td>ID / Registry</td><td>tenant·plant·asset는 서버 registry에서 결정. 매핑 변경 이력을 버전으로 보존하며 과거 재전송은 발생 시점에 유효한 매핑을 사용. 불명확하면 격리</td></tr><tr><td>시각</td><td>UTC occurred_at와 received_at 분리. 시각 무효이면 occurred_at=null, 원래 값은 raw에 남김. 초/ms 자동 추측 금지</td></tr><tr><td>품질</td><td>GOOD / UNCERTAIN / BAD. 오류 사유는 별도 canonical code. 연결 OFFLINE·최신성 STALE은 측정 품질과 별개</td></tr><tr><td>숫자 / 단위</td><td>NaN·Infinity·비정상 범위를 거절. 오류 sentinel은 value=null + BAD로 변환. 단위 변환과 원단위·변환 버전 추적</td></tr><tr><td>식별 / 재전송</td><td>없던 message_id·boot_id·sequence를 만들어 장치 원본 값처럼 표시하지 않음. 서버 event_id와 장치 ID 구분. replay=LIVE/BACKFILL/UNKNOWN</td></tr><tr><td>버전 / 참조</td><td>schema·adapter·registry·rule version 및 raw hash를 연결. 스키마 미지원은 조용히 수용하지 않음</td></tr></tbody></table></div>
+<p>한 메시지에 여러 채널이 있으면 envelope 하나와 channel observation 여러 개로 분리한다. 배열 순서만으로 영구 채널 ID를 정하지 않고 공급사 채널 정의를 고정한다. 이식 가능한 단위 코드는 내부 계약으로 확정하고 UI에서 현지 표기를 적용한다.</p></div>
+</details>
+<details class="article-section" id="storage" open>
+<summary><h2>저장 모델·멱등성·트랜잭션</h2></summary>
+<div class="section-body">
+<p>아래는 <strong>논리 모델 제안</strong>이며 migration 실행 결과가 아니다. 초기에는 관계형 DB와 transactional outbox를 사용하고 time-series 확장은 조회·보존 요구를 측정한 뒤 선택한다.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="논리 엔터티 · 주요 데이터 / 제약 표"><table><thead><tr><th scope="col">논리 엔터티</th><th scope="col">주요 데이터 / 제약</th></tr></thead><tbody><tr><td>device_registry + assignment_history</td><td>device identity, tenant/plant/asset, valid_from/to, enabled, credential_ref. 설치·교체 이력 보존</td></tr><tr><td>raw_ingest / delivery_receipt</td><td>수신 원문 참조·hash·received_at·broker/profile·validation 결과. 비밀 필드 노출 제한·원문 접근 감사</td></tr><tr><td>message_identity</td><td>registry device + source ID 또는 legacy 시각 키 + identity policy version. unique 제약과 정규 payload hash</td></tr><tr><td>observations</td><td>event_id/channel_id/metric, value/unit/quality, occurred_at/received_at, source_ref. envelope와 측정 중복을 구분</td></tr><tr><td>device_status / current_state</td><td>마지막 접속 관측·유효 측정·품질·최신성·신뢰 수준. 무조건 last-write-wins 금지</td></tr><tr><td>event_outbox / processing_state</td><td>event_id, topic/code, attempt, next_retry_at, lease, delivery status. 정규화 기록과 같은 transaction</td></tr><tr><td>decision / incident / audit</td><td>rule_version, evidence IDs, decision code, actor, correlation, acknowledgement/approval. 원래 근거 변경하지 않음</td></tr></tbody></table></div>
+<h3>멱등 처리 규칙</h3>
+<ol><li>가능하면 source message_id 또는 device + boot_id + sequence를 사용한다. MQTT Packet Identifier를 업무 키로 쓰지 않는다.</li><li>기존 device + timestamp 방식은 <strong>조건부 legacy 계약</strong>으로만 수용한다. 동일 키·동일 의미 payload는 중복, 동일 키·다른 내용은 CONFLICT로 보존한다.</li><li>raw bytes hash와 의미 payload hash를 구분한다. JSON 순서·재전송 표식처럼 transport-only 필드를 제외할지는 버전 있는 계약으로 확정하며 측정값은 제외하지 않는다.</li><li>DB unique 제약과 transaction으로 경쟁 요청을 직렬화한다. 애플리케이션의 사전 SELECT만으로 중복을 막지 않는다.</li><li>status에 source ID가 없으면 “완전한 이벤트 중복 제거”를 약속하지 않는다. 수신 기록은 보존하고 알림은 상태 전이·incident lifecycle 기준으로 멱등 처리한다.</li></ol></div>
+</details>
+<details class="article-section" id="delivery" open>
+<summary><h2>ACK·재시도·장애 복구</h2></summary>
+<div class="section-body">
+<div class="callout tip"><p><strong>장치 → broker PUBACK ≠ Haps DB commit.</strong> consumer ACK를 늦춰도 장치에 DB 저장 사실이 자동 전달되지는 않는다. <a href="https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html">OASIS MQTT §4.3</a></p></div>
+<div class="table-wrap" tabindex="0" role="region" aria-label="선택지 · 장점 · 한계 / 도입 조건 표"><table><thead><tr><th scope="col">선택지</th><th scope="col">장점</th><th scope="col">한계 / 도입 조건</th></tr></thead><tbody><tr><td>A. Broker 내구성 + durable inbox</td><td>장치 포맷 변경 최소화. 초기 후보</td><td>broker persistence·세션·큐 한도·consumer commit 후 ACK·백업 장애 범위를 검증해야 함</td></tr><tr><td>B. DB 기반 application ACK</td><td>장치가 저장 완료까지 보관 가능</td><td>펌웨어 변경, ACK 토픽/권한·correlation·재시도·영속 outbox 계약 필요</td></tr><tr><td>C. 보호된 현장 relay + 영속 spool</td><td>레거시 장치와 서버 분리, 현장 장애 흡수</td><td>추가 장비·운영·디스크·보안 책임. 장치→relay 구간 공백은 별도</td></tr></tbody></table></div>
+<p><strong>권장:</strong> A의 내구성이 검증되면 읽기 전용 PoC에 채택한다. 요구 RPO를 만족하지 못하면 B 또는 C를 별도 승인한다. “무손실”이라는 표현은 합의된 장애 범위·저장 한도 시험 전 사용하지 않는다.</p>
+<pre><code>RECEIVED
+→ bounded parse + identity/schema checks
+→ COMMITTED_INBOX 또는 COMMITTED_QUARANTINE
+→ consumer ACK
+→ normalize + observations + outbox transaction
+→ idempotent projection / rule evaluation
+→ PROCESSED
+
+DB 미저장 → ACK 성공 처리 금지 → bounded backpressure / reconnect
+일시 장애 → backoff + jitter + 제한된 재시도
+영구 형식 오류 → 접근 제한 quarantine + 운영 알림
+같은 업무 키·다른 내용 → CONFLICT (덮어쓰기 금지)</code></pre>
+<p>악성·과대 payload는 저장 상한 내에서 요약·hash·거절 사유만 보존하도록 별도 보안 정책을 둔다. 무한 재전송·무제한 quarantine도 허용하지 않는다. 중복 재수신 후 crash가 발생해도 규칙·Incident가 중복 생성되지 않아야 한다.</p>
+<p>Paho 사용을 선택한다면 ACK 제어·세션 보관·재구독을 설치 버전에 맞게 시험해야 한다. <a href="https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html">공식 Client API</a>는 구현 근거이며 패키지 설치 승인이 아니다.</p></div>
+</details>
+<details class="article-section" id="quality" open>
+<summary><h2>시각·재전송·센서 품질</h2></summary>
+<div class="section-body">
+<div class="table-wrap" tabindex="0" role="region" aria-label="상황 · Canonical 처리 · 규칙·화면 동작 표"><table><thead><tr><th scope="col">상황</th><th scope="col">Canonical 처리</th><th scope="col">규칙·화면 동작</th></tr></thead><tbody><tr><td>유효한 현재 측정</td><td>occurred_at 보존, quality 검사</td><td>승인된 rule·허용 지연 범위에서 평가</td></tr><tr><td>NTP/시각 무효</td><td>occurred_at=null, time_valid=false</td><td>TIME_UNTRUSTED. received_at을 측정 시각으로 위장하지 않음</td></tr><tr><td>센서 오류값</td><td>raw 보존, value=null, quality=BAD</td><td>평균·기준치 비교에서 제외하고 센서 상태 경고</td></tr><tr><td>과거 재전송</td><td>BACKFILL 또는 UNKNOWN + event-time</td><td>이력 저장. current 상태를 과거 값으로 덮지 않음</td></tr><tr><td>동일 시각 충돌</td><td>CONFLICT + 양쪽 원문 참조</td><td>자동 병합·삭제 금지, 운영 검토</td></tr><tr><td>설치 장소 변경 후 과거 데이터</td><td>발생 시점 registry assignment 연결</td><td>현재 사업장에 과거 데이터를 잘못 귀속하지 않음</td></tr></tbody></table></div>
+<p>NTP 동기화만으로 시각의 고유성·단조 증가를 보증할 수 없다. <a href="https://www.rfc-editor.org/rfc/rfc5905.html">RFC 5905</a>의 시계 조정과 별개로 메시지 식별·순서 계약이 필요하다.</p>
+<p>제출 사양의 부팅 후 시각 확보 전 미저장 구간은 <strong>복구 가능한 backlog가 아니라 결측</strong>이다. 배터리 RTC·상대시각 저장/사후 매핑·운영 제약 중 공급사가 지원할 방식을 확인한다. 확인되지 않은 값을 보간해 실측으로 표시하지 않는다.</p>
+<p>과거 위험 이벤트는 별도 historical Incident로 검토할 수 있지만 현재 경보를 자동 재발령하지 않는다. 같은 시각/다른 sequence의 우선순위와 허용 지연은 metric별 정책으로 버전 관리한다.</p></div>
+</details>
+<details class="article-section" id="status" open>
+<summary><h2>실시간 상태·Themis·Aegis·Haps 연결</h2></summary>
+<div class="section-body">
+<p>상태는 하나의 “정상/비정상” 값으로 압축하지 않는다.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="상태 축 · 제안 값 · 판단 증거 표"><table><thead><tr><th scope="col">상태 축</th><th scope="col">제안 값</th><th scope="col">판단 증거</th></tr></thead><tbody><tr><td>수집기</td><td>CONNECTED / DEGRADED / DISCONNECTED</td><td>collector 연결·구독 승인·DB 적재 health</td></tr><tr><td>장치 연결 관측</td><td>ONLINE / OFFLINE / UNKNOWN</td><td>인증된 heartbeat/LWT/실제 수신. collector 연결과 별개</td></tr><tr><td>측정 최신성</td><td>FRESH / STALE / UNKNOWN</td><td>마지막 유효 occurred_at, 기대 주기, 허용 지연</td></tr><tr><td>측정 품질</td><td>GOOD / UNCERTAIN / BAD</td><td>센서 오류·교정·값 범위·시각 신뢰</td></tr><tr><td>보호 기능</td><td>ACTIVE / INACTIVE / UNKNOWN</td><td>펌웨어 버전과 실제 상태 증거. 미연결만으로 buffer ACTIVE 추정 금지</td></tr></tbody></table></div>
+<p><strong>ThemisAX:</strong> locale-independent event와 승인된 rule_version을 사용한다. 장치/시간/품질/적용 범위가 충족되지 않으면 INSUFFICIENT_DATA를 반환한다. 온도 기준 등 법정·공정 수치를 임의 하드코딩하지 않는다.</p>
+<p><strong>AegisAX:</strong> raw hash → 정규 event → rule version → decision → 사용자 조회를 연결한다. 무결성 기록은 장치 교정이나 법적 적합성 인증이 아니며, 로컬 파일만으로 immutable storage를 주장하지 않는다.</p>
+<p><strong>Haps:</strong> 상태 질의는 허용된 Telemetry Read Tool로 처리한다. 최신 snapshot과 evidence handle을 먼저 확인하고, 규정 설명이 필요할 때만 별도 RAG를 결합한다. 법령 문서와 현장 측정 근거를 구분한다.</p>
+<p>“현재 상태 → 확인 시각·장치 범위 → 근거 핸들 → 필요한 조치”로 답변하며 실제 수집이 없으면 미연동/미확인을 표시한다. ko/en/vi 표현이 달라도 Event·Decision Code는 동일하다.</p></div>
+</details>
+<details class="article-section" id="api" open>
+<summary><h2>조회 API·Tool 계약·권한</h2></summary>
+<div class="section-body">
+<p>다음 endpoint와 tool은 <strong>제안</strong>이다. 기존 API를 변경하거나 새 route를 배포하지 않았다.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="제안 계약 · 용도 · 필수 제한 표"><table><thead><tr><th scope="col">제안 계약</th><th scope="col">용도</th><th scope="col">필수 제한</th></tr></thead><tbody><tr><td>GET /api/telemetry/devices/{device_id}/status</td><td>상태·시각·신뢰 수준</td><td>서버 session·device registry로 tenant/plant 권한 검증</td></tr><tr><td>GET /api/telemetry/observations</td><td>기간·metric·장치별 측정</td><td>기간/개수 상한·pagination·허용 metric·tenant 선필터</td></tr><tr><td>GET /api/telemetry/events/{event_id}/evidence</td><td>원문 참조·정규화·판정 추적</td><td>별도 raw 읽기 권한, credential 마스킹, 조회 감사</td></tr><tr><td>GET /api/telemetry/ingestion/health</td><td>연결·큐·적재 상태</td><td>관리자 범위 제한, 다른 tenant의 식별정보 노출 금지</td></tr><tr><td>GET_LINE_STATUS tool</td><td>허용 사업장·라인 snapshot</td><td>자연어 대신 canonical action + ID, 서버 재검증</td></tr></tbody></table></div>
+<pre><code>{
+  &quot;action&quot;: &quot;GET_LINE_STATUS&quot;,
+  &quot;plant_id&quot;: &quot;plant-demo&quot;,
+  &quot;line_id&quot;: &quot;line-demo&quot;,
+  &quot;as_of&quot;: &quot;2026-09-16T00:00:00Z&quot;
+}</code></pre>
+<p>tenant는 모델이 임의 지정하는 값이 아니라 인증 session에서 결정한다. Tool 결과에는 snapshot_id, observed_at, received_at, stale, quality, decision_code, evidence_refs를 포함한다. 사용자 설명 문자열은 canonical code와 분리해 localize한다.</p>
+<p>read-only 계정으로 PLC/MES write, 장치 재부팅, 설정 변경, 키 회전, firmware update를 실행하지 않는다. 향후 쓰기는 Policy Validation → Human Approval → Safety Validation → 전용 connector 및 감사 구조가 선행되어야 한다.</p></div>
+</details>
+<details class="article-section" id="capacity" open>
+<summary><h2>처리량·관측성·On-Prem</h2></summary>
+<div class="section-body">
+<p>제출 문서의 120초 주기·최대 7일·500ms 재전송 간격을 이용한 <strong>계산값</strong>이다. 실측 성능이나 SLA가 아니다.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="항목 · 계산 / 필요한 입력 표"><table><thead><tr><th scope="col">항목</th><th scope="col">계산 / 필요한 입력</th></tr></thead><tbody><tr><td>정상 측정</td><td>장치당 720 envelope/일, 5,040 envelope/주. 채널 observation 수는 별도</td></tr><tr><td>동시 복구</td><td>장치당 약 2 envelope/초 → N대면 약 2N/초 + live 부하</td></tr><tr><td>7일 backlog</td><td>장치당 이상적 전송시간 42분. 실제 망·재시도·DB·신규 데이터 제외</td></tr><tr><td>저장 예산</td><td>N × 720 × 평균 payload bytes × 보존 일수 + index/replica/관측 채널 비용</td></tr><tr><td>필수 계측</td><td>수신/거절/중복/충돌·inbox age·outbox lag·commit p95·queue depth·시각/품질 오류·reconnect</td></tr></tbody></table></div>
+<p>broker 큐 제한, worker 메모리 상한, 재시도 횟수·dead letter, DB connection pool, 보존·압축·백업은 수치 계약으로 확정해야 한다. 입력 미확정 상태에서 요금 업그레이드가 필요하다고 판단하지 않는다.</p>
+<p><strong>On-Prem:</strong> collector·registry·DB·rule evaluation을 공장망에 배치하는 구조를 우선 검토한다. 외부 LLM 호출은 수집 경로의 필수 의존성으로 만들지 않는다. 고객 데이터의 외부 AI 전송은 별도 승인·최소화·접근통제 대상이다. 현재 full on-prem/air-gap 운영 완료를 주장하지 않는다.</p></div>
+</details>
+<details class="article-section" id="plan" open>
+<summary><h2>단계별 구현 계획·담당·Exit Gate</h2></summary>
+<div class="section-body"><div class="table-wrap" tabindex="0" role="region" aria-label="단계 / 우선순위 · 제안 작업·담당 · 종료 조건 / 의존성 표"><table><thead><tr><th scope="col">단계 / 우선순위</th><th scope="col">제안 작업·담당</th><th scope="col">종료 조건 / 의존성</th></tr></thead><tbody><tr><td>G0 · P0 계약</td><td>AlexLAB + 올젠케어: 전체 schema, TLS/identity, ACK, firmware·PoC 범위</td><td>합의된 메시지·오류·재전송 fixture, 저장 책임·지원 기능 증거. 일정 산정 시작점</td></tr><tr><td>G1 · P0 수집</td><td>Backend 담당: registry, adapter, protected subscriber, bounded inbox</td><td>실장치 1종 read-only 수신; 미등록·다른 장치 사칭 거절; secret 로그 없음</td></tr><tr><td>G2 · P0 신뢰성</td><td>Backend/DB 담당: unique key, conflict, observation, outbox, recovery</td><td>DB/프로세스 중단·중복·backfill 시험 통과; 기록 누락/중복 영향 설명 가능</td></tr><tr><td>G3 · P0 관제</td><td>엔진 담당: time/quality/current projection, Themis bridge, Aegis trace</td><td>현재/과거 구분, 유효 fact+rule만 판정, end-to-end evidence 조회</td></tr><tr><td>G4 · P0 사용자 흐름</td><td>API/Chat 담당: 인증 조회 Tool·상태/Evidence UI</td><td>실데이터 상태 질문, tenant 격리, 미연동 표시, 다국어 canonical 결과 일치</td></tr><tr><td>G5 · P1 Pilot</td><td>운영/QA: fleet 부하·관측성·backup restore·키 회전·운영 문서</td><td>승인된 부하/SLO와 장애 범위 검증, 운영자 인수인계</td></tr><tr><td>확장 · P2</td><td>별도 승인: 추가 metric/장비·broker·TSDB·MES/SCADA</td><td>실제 connector contract·보안·회귀 시험. PLC write는 별도 Safe Action Gate</td></tr></tbody></table></div><p>단계 간 의존성은 G0→G1→G2→G3→G4다. 합성 fixture·스키마 검증 설계는 G0와 병행할 수 있지만 live 접속·migration·설치는 별도 구현 승인 후 수행한다. 검증되지 않은 인일·납기·비용 수치는 제시하지 않는다.</p></div>
+</details>
+<details class="article-section" id="acceptance" open>
+<summary><h2>수용 시험·운영 전환·롤백</h2></summary>
+<div class="section-body"><div class="table-wrap" tabindex="0" role="region" aria-label="시험 · 통과 기준 제안 표"><table><thead><tr><th scope="col">시험</th><th scope="col">통과 기준 제안</th></tr></thead><tbody><tr><td>장치/tenant 격리</td><td>허용 device·plant만 읽고, 다른 tenant 입력/조회·토픽 접근을 거절</td></tr><tr><td>스키마·크기</td><td>정상 메시지 수용; 누락·잘못된 자료형·범위·과대 배열의 안전한 격리</td></tr><tr><td>동일/충돌</td><td>동일 이벤트 100회 재전송 시 observation/Incident 영향 1회; 다른 내용은 conflict로 보존</td></tr><tr><td>영속성</td><td>DB 장애·worker crash·broker restart의 각 ACK 경계에서 누락 여부 대조; 허용 RPO를 기록</td></tr><tr><td>순서·재전송</td><td>7일 backlog + live 병행 시 current 역행·현재 경보 재발령 없음</td></tr><tr><td>시각·오류</td><td>NTP 무효·시각 역행·센서 오류·복수 오류를 품질/결측으로 표현</td></tr><tr><td>상태 신선도</td><td>변경 없는 status 침묵을 정상으로 단정하지 않음; 지연/미확인 구분</td></tr><tr><td>관측·감사</td><td>delivery → event → rule → decision → API response가 동일 correlation으로 조회됨</td></tr><tr><td>부하</td><td>합의한 N대·payload·동시 복구에서 큐/저장 지연·유실 지표가 승인 한도 충족</td></tr><tr><td>사용자 확인</td><td>실장치 질문과 Evidence 원문 추적, ko/en/vi 동일 snapshot의 decision code 일치</td></tr></tbody></table></div><p>위 “100회”는 제안된 검수 입력 수이며, 이미 수행한 시험 결과가 아니다. 부하·지연·RPO 수치는 G0에서 확정한다.</p>
+<h3>전환과 복구</h3><ol><li>별도 테스트 broker/합성 fixture → 승인된 실장치 1종 → 제한된 Pilot 순서로 확대한다.</li><li>feature flag와 전용 subscriber를 사용하며 기존 수집기가 있다면 동일 clientId 재사용으로 중단시키지 않는다.</li><li>실패 시 신규 collector를 중지하고 flag를 해제한다. 장치 outbox·원본 기록·기존 DB를 삭제하거나 초기화하지 않는다.</li><li>DB 변경은 additive migration·backup/restore 검증·권한 회귀 후 별도 승인한다. schema rollback보다 읽기 경로 분리를 우선 검토한다.</li></ol></div>
+</details>
+<details class="article-section" id="vendor" open>
+<summary><h2>올젠케어 협의 체크리스트</h2></summary>
+<div class="section-body">
+<div class="table-wrap" tabindex="0" role="region" aria-label="질문 · 확정할 답 표"><table><thead><tr><th scope="col">질문</th><th scope="col">확정할 답</th></tr></thead><tbody><tr><td>자료 누락</td><td>MQTT_BROKER.md / MQTT_CONNECTION.md, 전체 정상·오류·다채널 JSON</td></tr><tr><td>펌웨어</td><td>현재 설치 버전, 저장·재전송 출시 여부·시험 결과, 업데이트 방법</td></tr><tr><td>연결/신원</td><td>MQTT 버전, TLS/CA, 장치별 계정/인증서, ACL, subscriber 계정, clientId</td></tr><tr><td>세션/ACK</td><td>QoS/retain/Keep Alive/LWT, session expiry, broker persistence/queue, 장치 삭제 시점</td></tr><tr><td>복구/시각</td><td>replay·message_id·boot_id·sequence 추가 가능성, NTP 차단·부팅 공백·저장 포화 동작</td></tr><tr><td>채널/의미</td><td>channel ID, 측정 metric/단위/범위, 오류 품질, 교정·장치 교체 이력</td></tr><tr><td>규모</td><td>장치 수, 평균/최대 payload, 복구 동시성, 데이터 보존·고객 보안 경계</td></tr></tbody></table></div>
+<p><strong>회신 원칙:</strong> 중복 제거·상태 활용에는 설계 방향으로 동의하되 “이미 구현 완료”라고 회신하지 않는다. 재전송 간격은 전체 fleet 부하를 보고 확정하고 replay 표식 필요성을 협의한다. 이 문서는 회신안이며 업체에 자동 발송하지 않았다.</p></div>
+</details>
+<details class="article-section" id="sources" open>
+<summary><h2>근거·공개 범위·문서 이력</h2></summary>
+<div class="section-body">
+<p><strong>검토 기준일:</strong> 2026-09-16 · <strong>문서 유형:</strong> 기술 구현 설계 / 공개 파생본 v1.0.</p>
+<ul><li>비공개 업체 인증·JSON 사양 및 2026-09-04 MQTT 서버 협의 문서를 직접 검토했다. 원문·자격증명·내부 접속정보·보안 재현 절차는 공개하지 않는다.</li><li>Haps 코드 감사와 직전 MQTT 검토 결과를 기반으로 한다. 본문 컴포넌트·테이블·API·event schema는 신규 설계 제안이며 기존 구현 증거와 구분했다.</li><li><a href="../ART-20260915-001-haps-technical-audit/">Haps 기술 감사</a> · <a href="../ART-20260916-001-haps-multilingual-audit/">다국어 Foundation 감사</a> · <a href="../2026-09-15-haps-edge-mqtt-standard.html">기존 MQTT 표준화 협의안</a>.</li></ul>
+<div class="table-wrap" tabindex="0" role="region" aria-label="공식 근거 · 사용 범위 표"><table><thead><tr><th scope="col">공식 근거</th><th scope="col">사용 범위</th></tr></thead><tbody><tr><td><a href="https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html">OASIS MQTT 3.1.1</a></td><td>§3.1.4 clientId, §4.3 QoS/PUBACK, 세션·retained/LWT. DB commit은 별도 업무 계약</td></tr><tr><td><a href="https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html">OASIS MQTT 5.0</a></td><td>Session Expiry / Message Expiry / Response Topic. 현재 장치 버전은 미확인</td></tr><tr><td><a href="https://eclipse.dev/paho/files/paho.mqtt.python/html/client.html">Eclipse Paho Client</a></td><td>ACK 제어·TLS·연결 API. 설치 버전·실행 동작은 구현 시 검증</td></tr><tr><td><a href="https://mosquitto.org/man/mosquitto-conf-5.html">Mosquitto 설정 문서</a></td><td>TLS·인증·ACL·persistence의 분리. 업체 제품 사용 증거 아님</td></tr><tr><td><a href="https://www.rfc-editor.org/rfc/rfc5905.html">IETF RFC 5905</a></td><td>NTP 시각 조정. 이벤트 고유성·순서는 별도 계약</td></tr><tr><td><a href="https://www.rfc-editor.org/rfc/rfc2104.html">IETF RFC 2104</a></td><td>비밀키 기반 메시지 인증 개념. 오래된 해시 예시를 구현 권고로 채택하지 않음</td></tr></tbody></table></div>
+<p><strong>공개 안전:</strong> 공개 파일은 이 HTML과 CSS뿐이다. 개인·고객 데이터, 실제 broker/계정, 원문 첨부, 코드·DB dump, 운영 일지는 제외했다. 공개 URL은 누구나 열람할 수 있으며 noindex는 접근 통제가 아니다.</p>
+<p><a href="https://github.com/alex0916-agent/briefing-notes/commits/main/briefs/ART-20260916-002-haps-mqtt-implementation">공개본 변경 이력</a> · 실제 제품 구현·라이브 접속·DB migration은 이번 작업에서 수행하지 않았다.</p></div>
+</details>
+<details class="article-section" id="copy" open>
+<summary><h2>복사용 구현 요약</h2></summary>
+<div class="section-body"><p>아래 내용은 설계 요약이다. 실제 계정·주소·장치 ID는 포함하지 않는다.</p><button type="button" id="copy-report">구현 요약 복사</button><p id="copy-status" role="status" aria-live="polite"></p><pre id="copy-report-text" tabindex="0">HAPS MQTT IMPLEMENTATION DESIGN v1.0
+기준일: 2026-09-16
+범위: 기술 설계·공개 보고서. 제품 구현·실장치 연결·DB 변경 미실행.
+
+CURRENT
+MQTT Collector: NOT_IMPLEMENTED
+Vendor firmware store-and-forward: CONFIRM_RELEASE_REQUIRED
+Operational integration: NOT_READY
+Implementation preparation: CONDITIONAL_READY
+
+TARGET
+Protected MQTT → Read-only Adapter → Durable Inbox
+→ Canonical Telemetry → Event Outbox / State
+→ Themis Rule / Aegis Evidence → Authorized Haps Read Tool
+
+NON-NEGOTIABLE CONTRACTS
+1. TLS/identity/ACL와 tenant·plant registry binding
+2. PUBACK과 DB commit 책임 분리
+3. 동일 메시지 멱등 처리 / 동일 키 다른 내용 충돌 보존
+4. 측정·수신 시각, 품질, replay, 현재/과거 구분
+5. 검증된 현장 fact와 승인 rule만 판정
+6. 원문·정규화·판정·조회 Evidence 추적
+7. 센서 미연결만으로 buffer 활성·법적 부적합 추정 금지
+8. Read-only PoC. PLC/MES write 범위 밖.
+
+NEXT
+G0 계약 확인 → G1 수집 → G2 내구성 → G3 판정·추적
+→ G4 권한 조회·Chat → G5 fleet Pilot
+
+BLOCKERS
+전체 payload / broker·session·TLS·ACL 계약
+펌웨어 기능 출시 증거 / ACK·outbox 삭제 시점
+장치 수·보존·부하 기준 / PoC 고객 권한·보안 범위
+
+이 문서는 설계 제안이다. 구현 완료나 서비스 운영 인증이 아니다.</pre></div>
+</details>
+</main></div>
+<footer><div class="layout">Alex LAB · Haps™ MQTT Implementation Design · 공개용 파생 기술문서 · 실제 운영 검증 전</div></footer>
+  <script>
+    const sections = [...document.querySelectorAll("details.article-section")];
+    const links = [...document.querySelectorAll("nav a")];
+    const progress = document.querySelector("#progress");
+    const tocPanel = document.querySelector('#toc-panel');
+    const mobileToc = matchMedia('(max-width: 900px)');
+    const syncToc = () => { tocPanel.open = !mobileToc.matches; };
+    mobileToc.addEventListener('change', syncToc);
+    syncToc();
+
+    document.querySelector("#expand-all").addEventListener("click", () => {
+      sections.forEach(section => { section.open = true; });
+    });
+
+    document.querySelector("#collapse-all").addEventListener("click", () => {
+      sections.forEach(section => { section.open = false; });
+    });
+
+    links.forEach(link => {
+      link.addEventListener("click", () => {
+        const section = document.querySelector(link.getAttribute("href"));
+        if (section) section.open = true;
+        if (mobileToc.matches) tocPanel.open = false;
+      });
+    });
+
+    const updateProgress = () => {
+      const root = document.documentElement;
+      const distance = root.scrollHeight - root.clientHeight;
+      const ratio = distance > 0 ? root.scrollTop / distance : 0;
+      progress.style.width = `${Math.min(100, Math.max(0, ratio * 100))}%`;
+    };
+
+    addEventListener("scroll", updateProgress, { passive: true });
+    addEventListener("resize", updateProgress);
+    updateProgress();
+    sections.forEach(section => section.addEventListener('toggle', updateProgress));
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          links.forEach(link => {
+            link.classList.toggle("active", link.hash === `#${entry.target.id}`);
+          });
+        });
+      }, { rootMargin: "-20% 0px -70% 0px" });
+      sections.forEach(section => observer.observe(section));
+    }
+
+    let printState;
+    addEventListener('beforeprint', () => {
+      printState = sections.map(s => s.open);
+      sections.forEach(s => s.open = true);
+    });
+    addEventListener('afterprint', () => {
+      if (printState) sections.forEach((s,i) => s.open = printState[i]);
+    });
+    document.querySelector('#copy-report').addEventListener('click', async () => {
+      const text = document.querySelector('#copy-report-text').textContent;
+      const status = document.querySelector('#copy-status');
+      status.textContent = '복사 중입니다.';
+      try {
+        if (!navigator.clipboard) throw new Error('CLIPBOARD_UNAVAILABLE');
+        await navigator.clipboard.writeText(text);
+        status.textContent = '복사했습니다.';
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(document.querySelector('#copy-report-text'));
+        const selection = window.getSelection();
+        selection.removeAllRanges(); selection.addRange(range);
+        status.textContent = '자동 복사가 제한되었습니다. 선택된 내용을 직접 복사해 주세요.';
+      }
+    });
+  </script>
+</body></html>
