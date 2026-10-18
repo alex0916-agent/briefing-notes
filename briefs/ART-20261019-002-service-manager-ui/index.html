@@ -1,0 +1,98 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="description" content="Mac mini 서비스 관리 앱 V2 디자인 미리보기. HTML/CSS로 구현한 로그인과 첫 화면이며 실제 인증·서비스 제어는 연결하지 않았습니다."><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>Alex LAB · Service Manager — V2 미리보기</title><link rel="preload" href="assets/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="styles.css"><script src="app.js" defer></script></head><body><svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true"><defs><symbol id="i-power" viewBox="0 0 24 24">
+  <path d="M12 2v10" />
+  <path d="M18.4 6.6a9 9 0 1 1-12.77.04" />
+</symbol><symbol id="i-user-round" viewBox="0 0 24 24">
+  <circle cx="12" cy="8" r="5" />
+  <path d="M20 21a8 8 0 0 0-16 0" />
+</symbol><symbol id="i-lock-keyhole" viewBox="0 0 24 24">
+  <circle cx="12" cy="16" r="1" />
+  <rect x="3" y="10" width="18" height="12" rx="2" />
+  <path d="M7 10V7a5 5 0 0 1 10 0v3" />
+</symbol><symbol id="i-eye" viewBox="0 0 24 24">
+  <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+  <circle cx="12" cy="12" r="3" />
+</symbol><symbol id="i-eye-off" viewBox="0 0 24 24">
+  <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+  <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+  <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+  <path d="m2 2 20 20" />
+</symbol><symbol id="i-arrow-right" viewBox="0 0 24 24">
+  <path d="M5 12h14" />
+  <path d="m12 5 7 7-7 7" />
+</symbol><symbol id="i-server" viewBox="0 0 24 24">
+  <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+  <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+  <line x1="6" x2="6.01" y1="6" y2="6" />
+  <line x1="6" x2="6.01" y1="18" y2="18" />
+</symbol><symbol id="i-refresh-cw" viewBox="0 0 24 24">
+  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+  <path d="M21 3v5h-5" />
+  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+  <path d="M8 16H3v5" />
+</symbol><symbol id="i-external-link" viewBox="0 0 24 24">
+  <path d="M15 3h6v6" />
+  <path d="M10 14 21 3" />
+  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+</symbol><symbol id="i-play" viewBox="0 0 24 24">
+  <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+</symbol><symbol id="i-square" viewBox="0 0 24 24">
+  <rect width="18" height="18" x="3" y="3" rx="2" />
+</symbol><symbol id="i-check" viewBox="0 0 24 24">
+  <path d="M20 6 9 17l-5-5" />
+</symbol><symbol id="i-log-out" viewBox="0 0 24 24">
+  <path d="m16 17 5-5-5-5" />
+  <path d="M21 12H9" />
+  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+</symbol><symbol id="i-x" viewBox="0 0 24 24">
+  <path d="M18 6 6 18" />
+  <path d="m6 6 12 12" />
+</symbol><symbol id="i-chevron-right" viewBox="0 0 24 24">
+  <path d="m9 18 6-6-6-6" />
+</symbol><symbol id="i-circle-help" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="10" />
+  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+  <path d="M12 17h.01" />
+</symbol></defs></svg><section id="login-view" class="view login-view" aria-labelledby="login-title">
+  <div class="login-shell">
+    <div class="brand-panel">
+      <a class="brand-lockup" href="#login" aria-label="Alex LAB 서비스 관리 로그인"><span>Alex LAB</span><small>SERVICE MANAGER</small></a>
+      <div class="brand-message"><h1>내 서비스의 상태와 제어를,<br>한눈에.</h1><p>맥미니에서 운영하는 웹서비스를<br>안전하고 명확하게 관리하세요.</p></div>
+      <div class="system-illustration" aria-hidden="true">
+        <div class="server-node parent-node"><svg class="icon " aria-hidden="true"><use href="#i-server"></use></svg><span class="node-light"></span></div>
+        <div class="connector stem"></div><div class="connector branch"></div>
+        <div class="child-nodes"><div class="child-node"><span class="connector drop"></span><svg class="icon " aria-hidden="true"><use href="#i-server"></use></svg><span class="node-light"></span></div><div class="child-node"><span class="connector drop"></span><svg class="icon " aria-hidden="true"><use href="#i-server"></use></svg><span class="node-light"></span></div><div class="child-node"><span class="connector drop"></span><svg class="icon " aria-hidden="true"><use href="#i-server"></use></svg><span class="node-light"></span></div></div>
+      </div>
+      <div class="brand-caption"><svg class="icon " aria-hidden="true"><use href="#i-lock-keyhole"></use></svg> 개인 전용 워크스페이스</div>
+    </div>
+    <div class="form-panel">
+      <form id="preview-login" class="login-form" novalidate>
+        <div class="form-heading"><span class="eyebrow blue">WELCOME BACK</span><h2 id="login-title">서비스 관리에 로그인</h2><p>등록된 계정으로 로그인해 주세요.</p></div>
+        <label class="field-label" for="account">아이디</label>
+        <div class="input-wrap"><svg class="icon " aria-hidden="true"><use href="#i-user-round"></use></svg><input id="account" type="text" value="alex" autocomplete="off" spellcheck="false" aria-describedby="login-demo-note"></div>
+        <label class="field-label password-label" for="password">비밀번호</label>
+        <div class="input-wrap"><svg class="icon " aria-hidden="true"><use href="#i-lock-keyhole"></use></svg><input id="password" type="password" value="preview" autocomplete="off" aria-describedby="login-demo-note"><button id="password-toggle" class="icon-button" type="button" aria-label="비밀번호 표시" aria-pressed="false"><svg class="icon " aria-hidden="true"><use href="#i-eye"></use></svg></button></div>
+        <button class="button primary login-button" type="submit"><span>로그인</span><svg class="icon " aria-hidden="true"><use href="#i-arrow-right"></use></svg></button>
+        <p class="connection-note"><span></span>Tailscale 연결 후 이용할 수 있습니다<span></span></p>
+        <p id="login-demo-note" class="demo-note">디자인 데모 · 계정 확인 없이 첫 화면으로 이동합니다.</p>
+      </form>
+    </div>
+  </div>
+</section><section id="overview-view" class="view overview-view" aria-labelledby="overview-title" hidden>
+  <header class="app-header"><div class="header-inner">
+    <a href="#overview" class="app-brand" aria-label="Alex LAB 첫 화면"><span class="brand-icon"><svg class="icon " aria-hidden="true"><use href="#i-power"></use></svg></span><span class="brand-name">Alex LAB</span><span class="brand-divider"></span><span class="product-name">Service Manager</span></a>
+    <div class="account-tools"><span class="connection-badge"><span class="status-dot"></span>프라이빗 연결<span class="sr-only"> 샘플 상태</span></span><span class="header-divider"></span><span class="avatar">A</span><span class="account-name">Alex</span><a href="#login" class="logout-link">로그아웃<svg class="icon " aria-hidden="true"><use href="#i-log-out"></use></svg></a></div>
+  </div></header>
+  <main class="workspace">
+    <div class="workspace-heading"><div><span class="eyebrow muted">WORKSPACE / MAC MINI</span><h1 id="overview-title" tabindex="-1">내 웹서비스</h1><p>운영 중인 서비스를 확인하고 안전하게 제어하세요.</p></div><div class="refresh-tools"><div class="last-checked"><span>마지막 확인</span><time>10:20:05</time></div><button class="button secondary refresh-button" data-demo-action="새로고침"><svg class="icon " aria-hidden="true"><use href="#i-refresh-cw"></use></svg>새로고침</button></div></div>
+    <div class="summary-strip" aria-label="샘플 서비스 상태 요약"><div class="registered-count"><strong>3</strong><span>등록된 서비스</span></div><span class="summary-divider"></span><div><span class="status-dot running"></span><span>가동 중</span><b>1</b></div><div><span class="status-dot stopped"></span><span>중단</span><b>1</b></div><div><span class="status-dot unknown"></span><span>확인 불가</span><b>1</b></div></div>
+    <div class="workspace-grid">
+      <div class="list-column"><section class="surface service-surface" aria-labelledby="services-title"><div class="surface-heading"><h2 id="services-title">서비스 목록</h2><span class="count-badge">3개</span><span class="sample-label">샘플 데이터</span></div><div class="table-container"><table class="services-table"><caption class="sr-only">디자인 검토용 서비스 세 개. 이름이나 상세 버튼으로 선택할 수 있습니다.</caption><colgroup><col class="name-col"><col class="status-col"><col class="time-col"><col class="actions-col"></colgroup><thead><tr><th scope="col">서비스</th><th scope="col">상태</th><th scope="col">마지막 확인</th><th scope="col">작업</th></tr></thead><tbody><tr data-service="planfold" class="selected"><td><button class="service-identity" data-select-service="planfold" aria-pressed="true"><span class="service-monogram">PL</span><span class="service-label"><strong>Planfold</strong><small>기획 워크스페이스</small></span></button></td><td class="status-cell"><span class="status-badge running"><span class="status-dot"></span>가동 중</span></td><td class="time-cell"><span class="mobile-label">마지막 확인</span><time>10:20:05</time></td><td class="action-cell"><div class="row-actions"><button class="text-button" data-demo-action="열기"><svg class="icon " aria-hidden="true"><use href="#i-external-link"></use></svg><span>열기</span></button><button class="button small secondary" data-select-service="planfold" aria-label="Planfold 상세">상세</button></div></td></tr><tr data-service="hermes" class=""><td><button class="service-identity" data-select-service="hermes" aria-pressed="false"><span class="service-monogram">HM</span><span class="service-label"><strong>Hermes Dashboard</strong><small>운영 대시보드</small></span></button></td><td class="status-cell"><span class="status-badge stopped"><span class="status-dot"></span>중단</span></td><td class="time-cell"><span class="mobile-label">마지막 확인</span><time>10:20:05</time></td><td class="action-cell"><div class="row-actions"><button class="button small primary" data-demo-action="시작"><svg class="icon " aria-hidden="true"><use href="#i-play"></use></svg>시작</button></div></td></tr><tr data-service="haccpos" class=""><td><button class="service-identity" data-select-service="haccpos" aria-pressed="false"><span class="service-monogram">HO</span><span class="service-label"><strong>HaccpOS Platform</strong><small>업무 플랫폼</small></span></button></td><td class="status-cell"><span class="status-badge unknown"><span class="status-dot"></span>확인 불가</span></td><td class="time-cell"><span class="mobile-label">마지막 확인</span><time>10:20:05</time></td><td class="action-cell"><div class="row-actions"><button class="text-button" data-demo-action="다시 확인"><svg class="icon " aria-hidden="true"><use href="#i-refresh-cw"></use></svg><span>다시 확인</span></button></div></td></tr></tbody></table></div><p class="table-note">상태는 조회한 시점의 결과입니다.</p></section>
+      <section class="surface result-surface" aria-labelledby="result-title"><h2 id="result-title">최근 확인 결과</h2><div class="result-line"><span class="result-check"><svg class="icon " aria-hidden="true"><use href="#i-check"></use></svg></span><div><p>3개 서비스의 상태 확인이 완료됐습니다.</p><small>예시 · <time>10:20:05</time></small></div></div></section></div>
+      <aside class="surface detail-surface" aria-labelledby="selected-name"><div class="detail-heading"><span class="detail-eyebrow">선택한 서비스</span><div><h2 id="selected-name">Planfold</h2><span id="selected-status" class="status-badge running"><span class="status-dot"></span><span>가동 중</span></span></div></div><div class="detail-body"><dl class="detail-facts"><div><dt>프로세스</dt><dd id="detail-process">확인됨</dd></div><div><dt>화면 응답</dt><dd id="detail-response">정상</dd></div><div><dt>진행 작업</dt><dd id="detail-task">없음</dd></div><div><dt>마지막 확인</dt><dd><time>10:20:05</time></dd></div></dl><p id="detail-reason" class="detail-reason" hidden></p><button class="button primary open-service" data-demo-action="서비스 열기"><svg class="icon " aria-hidden="true"><use href="#i-external-link"></use></svg>서비스 열기</button><div class="detail-actions"><button class="button danger-quiet" data-demo-action="정지"><svg class="icon " aria-hidden="true"><use href="#i-square"></use></svg>정지</button><button class="button secondary" data-demo-action="재시작"><svg class="icon " aria-hidden="true"><use href="#i-refresh-cw"></use></svg>재시작</button></div><p class="action-help">정지·재시작 전 대상과 영향을 확인합니다.</p><section class="recent-operation"><h3>최근 작업</h3><div><span class="mini-check"><svg class="icon " aria-hidden="true"><use href="#i-check"></use></svg></span><p><strong>상태 확인 완료</strong><small>예시 · <time>10:20:05</time></small></p></div></section></div></aside>
+    </div>
+  </main>
+</section>
+<footer class="preview-footer"><span>설계용 예시 · 실제 서비스 상태가 아닙니다</span><a href="https://alex0916-agent.github.io/briefing-notes/briefs/ART-20261019-001-macmini-service-plan/" target="_blank" rel="noopener noreferrer">종합계획서 <svg class="icon " aria-hidden="true"><use href="#i-external-link"></use></svg></a></footer>
+<nav class="preview-toolbar" aria-label="디자인 화면 전환"><span class="preview-label"><span></span>V2 PREVIEW</span><div class="preview-tabs"><a href="#login" data-view-link="login">로그인</a><a href="#overview" data-view-link="overview">첫 화면</a></div><span class="preview-boundary">서비스 제어 미연결</span></nav>
+<div id="preview-feedback" class="toast" role="status" aria-live="polite" hidden><svg class="icon " aria-hidden="true"><use href="#i-circle-help"></use></svg><span></span><button class="icon-button" type="button" aria-label="안내 닫기"><svg class="icon " aria-hidden="true"><use href="#i-x"></use></svg></button></div>
+</body></html>
